@@ -16,6 +16,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/proxy"
+	"golang.org/x/term"
 )
 
 const (
@@ -99,17 +100,8 @@ func StartProbingQSRN(opts *config.Options) {
 			opts.Execute = GetOsShell()
 		}
 
-		// If interactive, read terminal size first...
-		if opts.Interactive {
-			err = RecvTerminalSize(qs)
-			if err != nil {
-				logrus.Debug(err)
-				continue
-			}
-		}
-
 		// Execute command/program and redirect stdin/out/err
-		err = ExecCommand(opts.Execute, qs)
+		err = ExecCommand(opts.Execute, qs, opts.Interactive)
 		if err != nil && !strings.Contains(err.Error(), "connection reset by peer") {
 			logrus.Error(err)
 			continue
@@ -302,13 +294,13 @@ func AttachToSocket(conn *QuantumSocket, interactive bool) error {
 	var err error
 	if interactive {
 		spn.Suffix = " Setting up TTY terminal..."
-		err = SendTerminalSize(conn)
+		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 		if err != nil {
 			return err
 		}
-		EnableInteractiveTerminal()
-		defer DisableInteractiveTerminal()
+		defer term.Restore(int(os.Stdin.Fd()), oldState)
 	}
+
 	spn.Stop()
 	go func() {
 		for {
@@ -411,3 +403,42 @@ func GetOsShell() string {
 		return NIX_SHELL
 	}
 }
+
+// func RecvTerminalSize(conn *QuantumSocket) error {
+// 	size := make([]byte, 2)
+// 	conn.SetReadDeadline(time.Now().Add(time.Second * KNOCK_CHECK_DURATION))
+// 	n, err := conn.Read(size)
+// 	conn.SetReadDeadline(time.Time{})
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if n != 2 {
+// 		return ErrTtyFailed
+// 	}
+
+// 	screen := struct {
+// 		io.Reader
+// 		io.Writer
+// 	}{os.Stdin, os.Stdout}
+
+// 	t := term.NewTerminal(screen, "")
+// 	return t.SetSize(int(size[1]), int(size[0]))
+// }
+
+// func SendTerminalSize(conn *QuantumSocket) error {
+// 	w, h, err := term.GetSize(int(os.Stdin.Fd()))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	conn.SetWriteDeadline(time.Now().Add(time.Second * KNOCK_CHECK_DURATION))
+// 	n, err := conn.Write([]byte{byte(w), byte(h)})
+// 	conn.SetWriteDeadline(time.Time{})
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if n != 2 {
+// 		return ErrTtyFailed
+// 	}
+
+// 	return nil
+// }
