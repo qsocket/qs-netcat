@@ -9,13 +9,12 @@ import (
 )
 
 const (
-	KNOCK_CHECKSUM_BASE       = 0xEE
-	KNOCK_CHECK_DURATION      = 5 //second
-	KNOCK_HEADER_B1      uint = 0xC0
-	KNOCK_HEADER_B2      uint = 0xDE
-	KNOCK_SUCCESS        uint = 0xE0
-	KNOCK_FAIL           uint = 0xE1
-	KNOCK_BUSY           uint = 0xE2
+	KNOCK_CHECKSUM_BASE      = 0xEE
+	KNOCK_HEADER_B1     uint = 0xC0
+	KNOCK_HEADER_B2     uint = 0xDE
+	KNOCK_SUCCESS       uint = 0xE0
+	KNOCK_FAIL          uint = 0xE1
+	KNOCK_BUSY          uint = 0xE2
 )
 
 var (

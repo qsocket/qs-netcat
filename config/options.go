@@ -14,19 +14,20 @@ import (
 var Version = "?"
 
 var usageStr = `
-qs-netcat [-lwiC] [-e cmd] [-p port]
+qs-netcat [-liC] [-e cmd] [-p port]
 -s <secret>  Secret (e.g. password).
 -l           Listening server [default: client]
 -g           Generate a Secret (random)
 -C           Disable encryption
 -t           Probe interval for QSRN (5s)
--T           Use TOR.
+-T           Use TOR
 -f <IP>      IPv4 address for port forwarding
 -p <port>    Port to listen on or forward to
 -i           Interactive login shell (TTY) [Ctrl-e q to terminate]
 -e <cmd>     Execute command [e.g. "bash -il" or "cmd.exe"]
+-pin         Enable certificate pinning on TLS connections
 -v           Verbose output
--q           Quiet. No log output 
+-q           Quiet. No log output
 
 Example to forward traffic from port 2222 to 192.168.6.7:22:
   $ qs-netcat -s MyCecret -l -f 192.168.6.7 -p 22     # Server
@@ -37,6 +38,7 @@ Example file transfer:
 Example for a reverse shell:
   $ qs-netcat -s MyCecret -l -i                       # Server
   $ qs-netcat -s MyCecret -i                          # Client
+
 `
 
 // PrintUsageErrorAndDie ...
@@ -63,6 +65,7 @@ type Options struct {
 	Interactive   bool
 	Listen        bool
 	RandomSecret  bool
+	CertPinning   bool
 	Quiet         bool
 	UseTor        bool
 	Verbose       bool
@@ -90,6 +93,7 @@ func ConfigureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 	fs.IntVar(&opts.ProbeInterval, "t", 5, "Probe interval for QSRN")
 	fs.BoolVar(&opts.DisableTLS, "C", false, "Disable encryption")
 	fs.BoolVar(&opts.UseTor, "T", false, "Use TOR")
+	fs.BoolVar(&opts.CertPinning, "pin", false, "Enable certificate pinning on TLS connections")
 	fs.BoolVar(&opts.Quiet, "q", false, "Quiet. No log outpu")
 	fs.BoolVar(&opts.Verbose, "v", false, "Verbose mode")
 	// Parse arguments and check for errors

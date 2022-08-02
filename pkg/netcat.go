@@ -1,6 +1,8 @@
 package qsutils
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"crypto/tls"
 	"errors"
 	"fmt"
@@ -28,11 +30,22 @@ const (
 	// OS Spesific binaries
 	WIN_SHELL = "cmd.exe"
 	NIX_SHELL = "/bin/bash -il"
+
+	// qsocket.io TLS certificate fingerprint
+	CERT_FINGERPRINT = "9A9680051DEA1E7E43AE5D842605F38C2AAE264BE12B296722C87A1F6A6B0F09"
+)
+
+const (
+	TAG_SHELL = iota + 1
+	TAG_EXECUTE
+	TAG_FORWARD
+	TAG_CONNECT
 )
 
 var (
 	ErrQsocketSessionEnd = errors.New("Qsocket session has ended")
 	ErrTtyFailed         = errors.New("TTY initialization failed")
+	ErrUntrustedCert     = errors.New("Certificate fingerprint mismatch")
 	spn                  = spinner.New(spinner.CharSets[9], 50*time.Millisecond)
 )
 
@@ -64,7 +77,7 @@ func StartProbingQSRN(opts *config.Options) {
 				continue
 			}
 		} else {
-			conn, err = DialTLS(qsrnAddr, opts.UseTor)
+			conn, err = DialTLS(qsrnAddr, opts.UseTor, opts.CertPinning)
 			if err != nil {
 				logrus.Error(err)
 				continue
@@ -77,7 +90,7 @@ func StartProbingQSRN(opts *config.Options) {
 			continue
 		}
 
-		err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts.Port))
+		err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
 		if err != nil {
 			if err != ErrConnRefused && err != io.EOF {
 				logrus.Error(err)
@@ -234,7 +247,7 @@ func Connect(opts *config.Options) error {
 			return err
 		}
 	} else {
-		conn, err = DialTLS(qsrnAddr, opts.UseTor)
+		conn, err = DialTLS(qsrnAddr, opts.UseTor, opts.CertPinning)
 		if err != nil {
 			return err
 		}
@@ -245,7 +258,7 @@ func Connect(opts *config.Options) error {
 		return err
 	}
 
-	err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts.Port))
+	err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
 	if err != nil {
 		return err
 	}
@@ -270,7 +283,7 @@ func ConnectAndBind(opts *config.Options, inConn *QuantumSocket) error {
 			return err
 		}
 	} else {
-		conn, err = DialTLS(qsrnAddr, opts.UseTor)
+		conn, err = DialTLS(qsrnAddr, opts.UseTor, opts.CertPinning)
 		if err != nil {
 			return err
 		}
@@ -281,7 +294,7 @@ func ConnectAndBind(opts *config.Options, inConn *QuantumSocket) error {
 		return err
 	}
 
-	err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts.Port))
+	err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
 	if err != nil {
 		return err
 	}
@@ -360,7 +373,7 @@ func Dial(addr string, tor bool) (net.Conn, error) {
 	return conn, nil
 }
 
-func DialTLS(addr string, tor bool) (net.Conn, error) {
+func DialTLS(addr string, tor, certPinning bool) (net.Conn, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}
@@ -386,11 +399,37 @@ func DialTLS(addr string, tor bool) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if certPinning {
+		connState := conn.ConnectionState()
+		for _, peerCert := range connState.PeerCertificates {
+			hash := sha256.Sum256(peerCert.Raw)
+			if !bytes.Equal(hash[0:], []byte(CERT_FINGERPRINT)) {
+				return nil, ErrUntrustedCert
+			}
+		}
+
+	}
+
 	return conn, nil
 }
 
-func TagPortUsage(port int) uint8 {
-	return uint8(utils.CaclChecksum([]byte{byte(port)}, 0xFF))
+func TagPortUsage(opts *config.Options) uint8 {
+	if opts.Listen &&
+		opts.Interactive &&
+		opts.Execute == "" {
+		return TAG_SHELL
+	} else if opts.Listen &&
+		opts.Interactive &&
+		opts.Execute != "" {
+		return TAG_EXECUTE
+	} else if opts.Listen &&
+		opts.ForwardAddr != "" {
+		return TAG_FORWARD
+	} else {
+		return TAG_CONNECT
+	}
+
 }
 
 func GetOsShell() string {
@@ -403,42 +442,3 @@ func GetOsShell() string {
 		return NIX_SHELL
 	}
 }
-
-// func RecvTerminalSize(conn *QuantumSocket) error {
-// 	size := make([]byte, 2)
-// 	conn.SetReadDeadline(time.Now().Add(time.Second * KNOCK_CHECK_DURATION))
-// 	n, err := conn.Read(size)
-// 	conn.SetReadDeadline(time.Time{})
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if n != 2 {
-// 		return ErrTtyFailed
-// 	}
-
-// 	screen := struct {
-// 		io.Reader
-// 		io.Writer
-// 	}{os.Stdin, os.Stdout}
-
-// 	t := term.NewTerminal(screen, "")
-// 	return t.SetSize(int(size[1]), int(size[0]))
-// }
-
-// func SendTerminalSize(conn *QuantumSocket) error {
-// 	w, h, err := term.GetSize(int(os.Stdin.Fd()))
-// 	if err != nil {
-// 		return err
-// 	}
-// 	conn.SetWriteDeadline(time.Now().Add(time.Second * KNOCK_CHECK_DURATION))
-// 	n, err := conn.Write([]byte{byte(w), byte(h)})
-// 	conn.SetWriteDeadline(time.Time{})
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if n != 2 {
-// 		return ErrTtyFailed
-// 	}
-
-// 	return nil
-// }
