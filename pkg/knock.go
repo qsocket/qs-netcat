@@ -1,9 +1,10 @@
-package qsutils
+package qsnetcat
 
 import (
 	"crypto/md5"
 	"errors"
-	"qsutils/utils"
+
+	"github.com/qsocket/qs-netcat/utils"
 
 	"github.com/sirupsen/logrus"
 )

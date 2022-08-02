@@ -1,4 +1,4 @@
-package qsutils
+package qsnetcat
 
 import (
 	"crypto/tls"

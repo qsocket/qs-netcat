@@ -4,9 +4,10 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"qsutils/config"
-	qsutils "qsutils/pkg"
-	"qsutils/utils"
+
+	"github.com/qsocket/qs-netcat/config"
+	qsnetcat "github.com/qsocket/qs-netcat/pkg"
+	"github.com/qsocket/qs-netcat/utils"
 
 	"github.com/sirupsen/logrus"
 )
@@ -29,16 +30,16 @@ func main() {
 	opts.Summarize()
 
 	if opts.Listen {
-		qsutils.StartProbingQSRN(opts)
+		qsnetcat.StartProbingQSRN(opts)
 		return
 	}
 
 	if opts.Port != 0 {
-		qsutils.ServeToLocal(opts)
+		qsnetcat.ServeToLocal(opts)
 		return
 	}
 
-	err = qsutils.Connect(opts)
+	err = qsnetcat.Connect(opts)
 	if err != nil {
 		logrus.Error(err)
 	}

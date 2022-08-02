@@ -1,4 +1,4 @@
-package qsutils
+package qsnetcat
 
 import (
 	"bytes"
@@ -9,11 +9,12 @@ import (
 	"io"
 	"net"
 	"os"
-	"qsutils/config"
-	"qsutils/utils"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/qsocket/qs-netcat/config"
+	"github.com/qsocket/qs-netcat/utils"
 
 	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
