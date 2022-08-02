@@ -15,6 +15,7 @@ import (
 
 	"github.com/qsocket/qs-netcat/config"
 	"github.com/qsocket/qs-netcat/utils"
+	qsocket "github.com/qsocket/qsocket/pkg"
 
 	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
@@ -23,17 +24,9 @@ import (
 )
 
 const (
-	// Qsocket options
-	QSRN_GATE          = "qsocket.io"
-	QSRN_GATE_TLS_PORT = 4443
-	QSRN_GATE_PORT     = 80
-
 	// OS Spesific binaries
 	WIN_SHELL = "cmd.exe"
 	NIX_SHELL = "/bin/bash -il"
-
-	// qsocket.io TLS certificate fingerprint
-	CERT_FINGERPRINT = "9A9680051DEA1E7E43AE5D842605F38C2AAE264BE12B296722C87A1F6A6B0F09"
 )
 
 const (
@@ -52,14 +45,14 @@ var (
 
 func StartProbingQSRN(opts *config.Options) {
 	var (
-		qsrnAddr   = fmt.Sprintf("%s:%d", QSRN_GATE, QSRN_GATE_TLS_PORT)
+		qsrnAddr   = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_TLS_PORT)
 		conn       any
 		err        error
 		firstProbe = true
 	)
 
 	if opts.DisableTLS {
-		qsrnAddr = fmt.Sprintf("%s:%d", QSRN_GATE, QSRN_GATE_PORT)
+		qsrnAddr = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_PORT)
 	}
 
 	go utils.WaitForExitSignal(os.Interrupt)
@@ -85,15 +78,15 @@ func StartProbingQSRN(opts *config.Options) {
 			}
 		}
 
-		qs, err := NewSocket(conn)
+		qs, err := qsocket.NewSocket(conn)
 		if err != nil {
 			logrus.Error(err)
 			continue
 		}
 
-		err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
+		err = qsocket.SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
 		if err != nil {
-			if err != ErrConnRefused && err != io.EOF {
+			if err != qsocket.ErrConnRefused && err != io.EOF {
 				logrus.Error(err)
 			}
 			continue
@@ -124,11 +117,11 @@ func StartProbingQSRN(opts *config.Options) {
 	}
 }
 
-func BindSockets(con1, con2 *QuantumSocket) error {
+func BindSockets(con1, con2 *qsocket.QuantumSocket) error {
 	defer con1.Close()
 	defer con2.Close()
-	chan1 := CreateSocketChan(con1)
-	chan2 := CreateSocketChan(con2)
+	chan1 := qsocket.CreateSocketChan(con1)
+	chan2 := qsocket.CreateSocketChan(con2)
 	var err error
 	for {
 		select {
@@ -152,9 +145,9 @@ func BindSockets(con1, con2 *QuantumSocket) error {
 	return err
 }
 
-func CreateOnConnectPipe(con1 *QuantumSocket, addr string) error {
+func CreateOnConnectPipe(con1 *qsocket.QuantumSocket, addr string) error {
 	defer con1.Close()
-	chan1 := CreateSocketChan(con1)
+	chan1 := qsocket.CreateSocketChan(con1)
 	first := <-chan1
 	if first == nil {
 		return nil
@@ -165,7 +158,7 @@ func CreateOnConnectPipe(con1 *QuantumSocket, addr string) error {
 	if err != nil {
 		return err
 	}
-	con2, err := NewSocket(conn)
+	con2, err := qsocket.NewSocket(conn)
 	if err != nil {
 		return err
 	}
@@ -175,7 +168,7 @@ func CreateOnConnectPipe(con1 *QuantumSocket, addr string) error {
 		return err
 	}
 
-	chan2 := CreateSocketChan(con2)
+	chan2 := qsocket.CreateSocketChan(con2)
 
 	for {
 		select {
@@ -212,7 +205,7 @@ func ServeToLocal(opts *config.Options) {
 			logrus.Error(err)
 			continue
 		}
-		qs, err := NewSocket(inConn)
+		qs, err := qsocket.NewSocket(inConn)
 		if err != nil {
 			logrus.Error(err)
 			continue
@@ -232,9 +225,9 @@ func Connect(opts *config.Options) error {
 		spn.Start()
 	}
 
-	qsrnAddr := fmt.Sprintf("%s:%d", QSRN_GATE, QSRN_GATE_TLS_PORT)
+	qsrnAddr := fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_TLS_PORT)
 	if opts.DisableTLS {
-		qsrnAddr = fmt.Sprintf("%s:%d", QSRN_GATE, QSRN_GATE_PORT)
+		qsrnAddr = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_PORT)
 	}
 
 	var (
@@ -254,12 +247,12 @@ func Connect(opts *config.Options) error {
 		}
 	}
 
-	qs, err := NewSocket(conn)
+	qs, err := qsocket.NewSocket(conn)
 	if err != nil {
 		return err
 	}
 
-	err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
+	err = qsocket.SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
 	if err != nil {
 		return err
 	}
@@ -267,10 +260,10 @@ func Connect(opts *config.Options) error {
 	return AttachToSocket(qs, opts.Interactive)
 }
 
-func ConnectAndBind(opts *config.Options, inConn *QuantumSocket) error {
-	qsrnAddr := fmt.Sprintf("%s:%d", QSRN_GATE, QSRN_GATE_TLS_PORT)
+func ConnectAndBind(opts *config.Options, inConn *qsocket.QuantumSocket) error {
+	qsrnAddr := fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_TLS_PORT)
 	if opts.DisableTLS {
-		qsrnAddr = fmt.Sprintf("%s:%d", QSRN_GATE, QSRN_GATE_PORT)
+		qsrnAddr = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_PORT)
 	}
 
 	var (
@@ -290,12 +283,12 @@ func ConnectAndBind(opts *config.Options, inConn *QuantumSocket) error {
 		}
 	}
 
-	qs, err := NewSocket(conn)
+	qs, err := qsocket.NewSocket(conn)
 	if err != nil {
 		return err
 	}
 
-	err = SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
+	err = qsocket.SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
 	if err != nil {
 		return err
 	}
@@ -303,7 +296,7 @@ func ConnectAndBind(opts *config.Options, inConn *QuantumSocket) error {
 	return BindSockets(qs, inConn)
 }
 
-func AttachToSocket(conn *QuantumSocket, interactive bool) error {
+func AttachToSocket(conn *qsocket.QuantumSocket, interactive bool) error {
 
 	var err error
 	if interactive {
@@ -405,7 +398,7 @@ func DialTLS(addr string, tor, certPinning bool) (net.Conn, error) {
 		connState := conn.ConnectionState()
 		for _, peerCert := range connState.PeerCertificates {
 			hash := sha256.Sum256(peerCert.Raw)
-			if !bytes.Equal(hash[0:], []byte(CERT_FINGERPRINT)) {
+			if !bytes.Equal(hash[0:], []byte(qsocket.CERT_FINGERPRINT)) {
 				return nil, ErrUntrustedCert
 			}
 		}

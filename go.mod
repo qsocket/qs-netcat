@@ -14,5 +14,6 @@ require (
 require (
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/qsocket/qsocket v0.0.0-20220802121822-80db3f34fd08 // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 )

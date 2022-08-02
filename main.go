@@ -12,8 +12,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Version = "v1.0"
-
 func main() {
 
 	// Create a FlagSet and sets the usage
@@ -23,7 +21,6 @@ func main() {
 	if err != nil {
 		config.PrintUsageErrorAndDie(err)
 	}
-	config.SetVersion(Version)
 	if opts.RandomSecret {
 		opts.Secret = utils.RandomString(20)
 	}

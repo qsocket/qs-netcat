@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package qsutils
+package qsnetcat
 
 import (
 	"errors"

@@ -11,23 +11,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Version = "?"
-
-var usageStr = `
+var (
+	Version  = "?"
+	usageStr = `
 qs-netcat [-liC] [-e cmd] [-p port]
--s <secret>  Secret (e.g. password).
--l           Listening server [default: client]
--g           Generate a Secret (random)
--C           Disable encryption
--t           Probe interval for QSRN (5s)
--T           Use TOR
--f <IP>      IPv4 address for port forwarding
--p <port>    Port to listen on or forward to
--i           Interactive login shell (TTY) [Ctrl-e q to terminate]
--e <cmd>     Execute command [e.g. "bash -il" or "cmd.exe"]
--pin         Enable certificate pinning on TLS connections
--v           Verbose output
--q           Quiet. No log output
+Version: %s
+	-s <secret>  Secret. (e.g. password).
+	-l           Listening server. [default: client]
+	-g           Generate a Secret. (random)
+	-C           Disable encryption.
+	-t           Probe interval for QSRN. (5s)
+	-T           Use TOR.
+	-f <IP>      IPv4 address for port forwarding.
+	-p <port>    Port to listen on or forward to.
+	-i           Interactive login shell. (TTY) [Ctrl-e q to terminate]
+	-e <cmd>     Execute command. [e.g. "bash -il" or "cmd.exe"]
+	-pin         Enable certificate pinning on TLS connections.
+	-v           Verbose output.
+	-q           Quiet. No log output.
 
 Example to forward traffic from port 2222 to 192.168.6.7:22:
   $ qs-netcat -s MyCecret -l -f 192.168.6.7 -p 22     # Server
@@ -40,17 +41,18 @@ Example for a reverse shell:
   $ qs-netcat -s MyCecret -i                          # Client
 
 `
+)
 
 // PrintUsageErrorAndDie ...
 func PrintUsageErrorAndDie(err error) {
 	color.Red("\n%s", err.Error())
-	fmt.Println(usageStr)
+	fmt.Printf(usageStr, Version)
 	os.Exit(1)
 }
 
 // PrintHelpAndDie ...
 func PrintHelpAndDie() {
-	print(usageStr)
+	fmt.Printf(usageStr, Version)
 	os.Exit(0)
 }
 
@@ -76,7 +78,6 @@ type Options struct {
 // specific flags. On success, an options structure is returned configured
 // based on the selected flags.
 func ConfigureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
-
 	// Create empty options
 	opts := &Options{}
 
@@ -166,8 +167,4 @@ func (opts *Options) Summarize() {
 		fmt.Printf(" Probe Duration: %s\n", time.Second*time.Duration(opts.ProbeInterval))
 	}
 	print("\n")
-}
-
-func SetVersion(ver string) {
-	Version = ver
 }
