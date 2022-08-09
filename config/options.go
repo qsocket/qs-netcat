@@ -135,15 +135,16 @@ func (opts *Options) Summarize() {
 	if opts.Quiet {
 		return
 	}
-	yellow := color.New(color.FgYellow).Add(color.Bold)
-	red := color.New(color.FgRed).Add(color.Bold)
-	blue := color.New(color.FgBlue).Add(color.Bold)
+	yellow := color.New(color.FgYellow)
+	byellow := color.New(color.FgYellow).Add(color.Bold)
+	red := color.New(color.FgRed)
+	blue := color.New(color.FgBlue)
 	mode := "client"
 	if opts.Listen {
 		mode = "server"
 	}
 
-	yellow.Printf("[#] %s\n", blue.Sprintf(".::Qsocket Netcat::."))
+	byellow.Printf("[#] %s\n", blue.Sprintf(".::Qsocket Netcat::."))
 	yellow.Print("├──>")
 	fmt.Printf(" Secret: %s\n", red.Sprintf(opts.Secret))
 	yellow.Print("├──>")

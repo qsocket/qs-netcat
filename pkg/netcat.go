@@ -52,18 +52,18 @@ func StartProbingQSRN(opts *config.Options) {
 		}
 
 		qs := &qsocket.Qsocket{}
-		if opts.DisableTLS {
-			qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts))
-			if err != nil {
-				logrus.Error(err)
-				continue
-			}
+		if opts.UseTor {
+			qs, err = qsocket.DialProxy(opts.Secret, TagPortUsage(opts), "127.0.0.1:9050")
 		} else {
-			qs, err = qsocket.DialTLS(opts.Secret, TagPortUsage(opts), opts.CertPinning)
-			if err != nil {
-				logrus.Error(err)
-				continue
+			if opts.DisableTLS {
+				qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts))
+			} else {
+				qs, err = qsocket.DialTLS(opts.Secret, TagPortUsage(opts), opts.CertPinning)
 			}
+		}
+		if err != nil {
+			logrus.Error(err)
+			continue
 		}
 
 		// First check if forwarding enabled
