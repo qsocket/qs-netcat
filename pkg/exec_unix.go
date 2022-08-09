@@ -13,12 +13,12 @@ import (
 	"syscall"
 
 	"github.com/creack/pty"
-	qsocket "github.com/qsocket/qsocket/pkg"
+	qsocket "github.com/qsocket/qsocket-go"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/term"
 )
 
-func ExecCommand(comm string, conn *qsocket.QuantumSocket, interactive bool) error {
+func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	params := strings.Split(comm, " ")
 	cmd := &exec.Cmd{}
 	defer conn.Close()

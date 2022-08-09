@@ -15,7 +15,7 @@ import (
 
 	"github.com/qsocket/qs-netcat/config"
 	"github.com/qsocket/qs-netcat/utils"
-	qsocket "github.com/qsocket/qsocket/pkg"
+	qsocket "github.com/qsocket/qsocket-go"
 
 	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
@@ -45,15 +45,9 @@ var (
 
 func StartProbingQSRN(opts *config.Options) {
 	var (
-		qsrnAddr   = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_TLS_PORT)
-		conn       any
 		err        error
 		firstProbe = true
 	)
-
-	if opts.DisableTLS {
-		qsrnAddr = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_PORT)
-	}
 
 	go utils.WaitForExitSignal(os.Interrupt)
 
@@ -64,32 +58,19 @@ func StartProbingQSRN(opts *config.Options) {
 			firstProbe = false
 		}
 
+		qs := &qsocket.Qsocket{}
 		if opts.DisableTLS {
-			conn, err = Dial(qsrnAddr, opts.UseTor)
+			qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts))
 			if err != nil {
 				logrus.Error(err)
 				continue
 			}
 		} else {
-			conn, err = DialTLS(qsrnAddr, opts.UseTor, opts.CertPinning)
+			qs, err = qsocket.DialTLS(opts.Secret, TagPortUsage(opts), opts.CertPinning)
 			if err != nil {
 				logrus.Error(err)
 				continue
 			}
-		}
-
-		qs, err := qsocket.NewSocket(conn)
-		if err != nil {
-			logrus.Error(err)
-			continue
-		}
-
-		err = qsocket.SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
-		if err != nil {
-			if err != qsocket.ErrConnRefused && err != io.EOF {
-				logrus.Error(err)
-			}
-			continue
 		}
 
 		// First check if forwarding enabled
@@ -117,35 +98,7 @@ func StartProbingQSRN(opts *config.Options) {
 	}
 }
 
-func BindSockets(con1, con2 *qsocket.QuantumSocket) error {
-	defer con1.Close()
-	defer con2.Close()
-	chan1 := qsocket.CreateSocketChan(con1)
-	chan2 := qsocket.CreateSocketChan(con2)
-	var err error
-	for {
-		select {
-		case b1 := <-chan1:
-			if b1 != nil {
-				_, err = con2.Write(b1)
-			} else {
-				err = ErrQsocketSessionEnd
-			}
-		case b2 := <-chan2:
-			if b2 != nil {
-				_, err = con1.Write(b2)
-			} else {
-				err = ErrQsocketSessionEnd
-			}
-		}
-		if err != nil {
-			break
-		}
-	}
-	return err
-}
-
-func CreateOnConnectPipe(con1 *qsocket.QuantumSocket, addr string) error {
+func CreateOnConnectPipe(con1 *qsocket.Qsocket, addr string) error {
 	defer con1.Close()
 	chan1 := qsocket.CreateSocketChan(con1)
 	first := <-chan1
@@ -260,7 +213,7 @@ func Connect(opts *config.Options) error {
 	return AttachToSocket(qs, opts.Interactive)
 }
 
-func ConnectAndBind(opts *config.Options, inConn *qsocket.QuantumSocket) error {
+func ConnectAndBind(opts *config.Options, inConn *qsocket.Qsocket) error {
 	qsrnAddr := fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_TLS_PORT)
 	if opts.DisableTLS {
 		qsrnAddr = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_PORT)
@@ -293,10 +246,10 @@ func ConnectAndBind(opts *config.Options, inConn *qsocket.QuantumSocket) error {
 		return err
 	}
 
-	return BindSockets(qs, inConn)
+	return qsocket.BindSockets(qs, inConn)
 }
 
-func AttachToSocket(conn *qsocket.QuantumSocket, interactive bool) error {
+func AttachToSocket(conn *qsocket.Qsocket, interactive bool) error {
 
 	var err error
 	if interactive {
