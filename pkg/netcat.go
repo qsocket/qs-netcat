@@ -29,13 +29,6 @@ const (
 	NIX_SHELL = "/bin/bash -il"
 )
 
-const (
-	TAG_SHELL = iota + 1
-	TAG_EXECUTE
-	TAG_FORWARD
-	TAG_CONNECT
-)
-
 var (
 	ErrQsocketSessionEnd = errors.New("Qsocket session has ended")
 	ErrTtyFailed         = errors.New("TTY initialization failed")
@@ -365,16 +358,18 @@ func TagPortUsage(opts *config.Options) uint8 {
 	if opts.Listen &&
 		opts.Interactive &&
 		opts.Execute == "" {
-		return TAG_SHELL
+		return qsocket.TAG_SHELL
 	} else if opts.Listen &&
 		opts.Interactive &&
 		opts.Execute != "" {
-		return TAG_EXECUTE
+		return qsocket.TAG_EXEC
 	} else if opts.Listen &&
 		opts.ForwardAddr != "" {
-		return TAG_FORWARD
+		return qsocket.TAG_PROXY_SERVER
+	} else if opts.Port != 0 {
+		return qsocket.TAG_PROXY_CLIENT
 	} else {
-		return TAG_CONNECT
+		return qsocket.TAG_CONNECT
 	}
 
 }
