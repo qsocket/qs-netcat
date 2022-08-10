@@ -26,7 +26,7 @@ Version: %s
 	-p <port>    Port to listen on or forward to.
 	-i           Interactive login shell. (TTY) [Ctrl-e q to terminate]
 	-e <cmd>     Execute command. [e.g. "bash -il" or "cmd.exe"]
-	-pin         Enable certificate pinning on TLS connections.
+	-pin         Enable certificate fingerprint verification on TLS connections.
 	-v           Verbose output.
 	-q           Quiet. No log output.
 
