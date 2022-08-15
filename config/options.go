@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -97,6 +98,13 @@ func ConfigureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 	fs.BoolVar(&opts.CertPinning, "pin", false, "Enable certificate pinning on TLS connections")
 	fs.BoolVar(&opts.Quiet, "q", false, "Quiet. No log outpu")
 	fs.BoolVar(&opts.Verbose, "v", false, "Verbose mode")
+
+	// If QS_ARGS exists overwrite the given arguments.
+	qsArgs := os.Getenv("QS_ARGS")
+	if qsArgs != "" {
+		args = strings.Split(qsArgs, " ")
+	}
+
 	// Parse arguments and check for errors
 	if err := fs.Parse(args); err != nil {
 		return nil, err
