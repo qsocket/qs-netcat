@@ -5,13 +5,18 @@ package qsnetcat
 
 import (
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 	"syscall"
+
+	"github.com/creack/pty"
+	qsocket "github.com/qsocket/qsocket-go"
+	"golang.org/x/term"
 )
 
-func ExecCommand(comm string, conn *QuantumSocket) error {
+func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	params := strings.Split(comm, " ")
 	cmd := &exec.Cmd{}
 	defer conn.Close()
@@ -23,6 +28,7 @@ func ExecCommand(comm string, conn *QuantumSocket) error {
 	} else {
 		cmd = exec.Command(params[0], params[1:]...)
 	}
+	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true} // Hide new process window
 
 	if interactive {
@@ -36,18 +42,23 @@ func ExecCommand(comm string, conn *QuantumSocket) error {
 		defer ptmx.Close() // Best effort.
 
 		// Handle pty size.
-		ch := make(chan os.Signal, 1)
-		signal.Notify(ch, syscall.SIGWINCH)
-		go func() {
-			for range ch {
-				if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
-					logrus.Errorf("error resizing pty: %s", err)
-				}
-			}
-		}()
-		ch <- syscall.SIGWINCH // Initial resize.
-		defer signal.Stop(ch)  // Cleanup signals when done.
-		defer close(ch)
+		// ch := make(chan os.Signal, 1)
+		// signal.Notify(ch, syscall.SIGWINCH)
+		// go func() {
+		// 	for range ch {
+		// 		if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
+		// 			logrus.Errorf("error resizing pty: %s", err)
+		// 		}
+		// 	}
+		// }()
+		// ch <- syscall.SIGWINCH // Initial resize.
+		// defer signal.Stop(ch)  // Cleanup signals when done.
+		// defer close(ch)
+
+		err = pty.InheritSize(os.Stdin, ptmx)
+		if err != nil {
+			return err
+		}
 
 		// Set stdin in raw mode.
 		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
