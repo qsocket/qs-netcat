@@ -23,7 +23,39 @@
 qs-netcat is a cross-platform networking utility which reads and writes data across systems using the [QSRN](https://github.com/qsocket/qsrn). 
 It allows redirecting true PTY session with reverse connections effectively backdooring systems, creating TCP proxies, and transfering files to/from systems under NAT networks.
 
+## Installation
+|    **Tool**   |                 **Build From Source**                |       **Docker Image**      |                     **Binary Release**                    |
+|:-------------:|:----------------------------------------------------:|:---------------------------:|:---------------------------------------------------------:|
+| **qs-netcat** | ```go install github.com/qsocket/qs-netcat@latest``` | [Download](#docker-install) | [Download](https://github.com/qsocket/qs-netcat/releases) |
 
+---
+
+**Supported Platforms**
+|  **Platform** | **AMD64** | **386** | **ARM** | **ARM64** | **MIPS** | **MIPS64** | **MIPS64LE** | **PPC64** | **PPC64LE** | **S390X** |
+|:-------------:|:---------:|:-------:|:-------:|:---------:|:--------:|:----------:|:------------:|:---------:|:-----------:|:---------:|
+|   **Linux**   |     ✅     |    ✅    |    ✅    |     ✅     |     ✅    |      ✅     |       ✅      |     ✅     |      ✅      |     ✅     |
+|   **Darwin**  |     ✅     |    ❌    |    ❌    |     ✅     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+|  **Windows**  |     ✅     |    ✅    |    ✅    |     ✅     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+|  **OpenBSD**  |     ✅     |    ✅    |    ✅    |     ✅     |     ❌    |      ✅     |       ❌      |     ❌     |      ❌      |     ❌     |
+|   **NetBSD**  |     ✅     |    ✅    |    ✅    |     ✅     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+|  **FreeBSD**  |     ✅     |    ✅    |    ✅    |     ✅     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+|  **Android**  |     ✅     |    ✅    |    ✅    |     ✅     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+|    **IOS**    |     ✅     |    ❌    |    ❌    |     ✅     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+|  **Solaris**  |     ✅     |    ❌    |    ❌    |     ❌     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+|  **Illumos**  |     ✅     |    ❌    |    ❌    |     ❌     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+| **Dragonfly** |     ✅     |    ❌    |    ❌    |     ❌     |     ❌    |      ❌     |       ❌      |     ❌     |      ❌      |     ❌     |
+|    **AIX**    |     ❌     |    ❌    |    ❌    |     ❌     |     ❌    |      ❌     |       ❌      |     ✅     |      ❌      |     ❌     |
+
+### Docker Install
+
+[![Docker](http://dockeri.co/image/egee/qsocket)](https://hub.docker.com/r/egee/qsocket/)
+
+```
+docker pull egee/qsocket
+docker run -it egee/qsocket
+```
+
+## Usage
 
 ```
 qs-netcat [-liC] [-e cmd] [-p port]
@@ -52,4 +84,20 @@ Example for a reverse shell:
   $ qs-netcat -s MyCecret -l -i                       # Server
   $ qs-netcat -s MyCecret -i                          # Client
 
+```
+### Examples
+1. SSH from *Workstation B* to *Workstation A* through any firewall/NAT
+```
+$ qs-netcat -f "localhost" -p 22 -l     # Workstation A
+$ qsocket ssh root@qsocket.io        # Workstation B
+```
+2. Log in to Workstation A from Workstation B through any firewall/NAT
+```
+$ qs-netcat -l -i   # Workstation A
+$ qs-netcat -i      # Workstation B
+```
+3. Transfer files from *Workstation B* to *Workstation A*
+```
+$ qs-netcat -q -s MySecret -l > file.txt     # Workstation A
+$ qs-netcat -q -s MySecret < file.txt        # Workstation B
 ```
