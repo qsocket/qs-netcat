@@ -59,6 +59,7 @@ func PrintHelpAndDie() {
 
 // Main config struct for parsing the TOML file
 type Options struct {
+	UUID          string
 	Secret        string
 	Execute       string
 	ForwardAddr   string
@@ -83,8 +84,10 @@ func ConfigureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 	opts := &Options{}
 
 	// Define flags
+
 	fs.BoolVar(&opts.help, "h", false, "Prompt help")
 	fs.BoolVar(&opts.help, "help", false, "Prompt help")
+	fs.StringVar(&opts.UUID, "uuid", "", "UUID form of the qsocket secret.")
 	fs.StringVar(&opts.Secret, "s", "", "Secret (e.g. password)")
 	fs.StringVar(&opts.Execute, "e", "", "Execute command [e.g. \"bash -il\" or \"cmd.exe\"]")
 	fs.StringVar(&opts.ForwardAddr, "f", "", "IPv4 address for port forwarding")
@@ -114,7 +117,7 @@ func ConfigureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 		PrintHelpAndDie()
 	}
 
-	if !opts.RandomSecret && opts.Secret == "" {
+	if !opts.RandomSecret && (opts.Secret == "" && opts.UUID == "") {
 		color.New(color.FgBlue).Add(color.Bold).Print("[>] ")
 		print("Enter Secret (or press Enter to generate): ")
 		n, _ := fmt.Scanln(&opts.Secret)

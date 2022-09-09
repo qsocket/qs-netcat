@@ -62,7 +62,9 @@ func StartProbingQSRN(opts *config.Options) {
 			}
 		}
 		if err != nil {
-			logrus.Error(err)
+			if err != qsocket.ErrConnRefused {
+				logrus.Error(err)
+			}
 			continue
 		}
 
@@ -165,43 +167,37 @@ func ServeToLocal(opts *config.Options) {
 
 func Connect(opts *config.Options) error {
 	defer spn.Stop()
-
 	if !opts.Quiet {
 		spn.Suffix = " Dialing qsocket relay network..."
 		spn.Start()
 	}
 
-	qsrnAddr := fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_TLS_PORT)
-	if opts.DisableTLS {
-		qsrnAddr = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_PORT)
-	}
-
 	var (
-		conn any
-		err  error
+		err error
+		qs  *qsocket.Qsocket
 	)
 
 	if opts.DisableTLS {
-		conn, err = Dial(qsrnAddr, opts.UseTor)
+		qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts))
 		if err != nil {
 			return err
 		}
 	} else {
-		conn, err = DialTLS(qsrnAddr, opts.UseTor, opts.CertPinning)
+		qs, err = qsocket.DialTLS(opts.Secret, TagPortUsage(opts), opts.CertPinning)
 		if err != nil {
 			return err
 		}
 	}
 
-	qs, err := qsocket.NewSocket(conn)
-	if err != nil {
-		return err
-	}
+	// qs, err := qsocket.NewSocket(conn)
+	// if err != nil {
+	// 	return err
+	// }
 
-	err = qsocket.SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
-	if err != nil {
-		return err
-	}
+	// err = qs.SendKnockSequence(opts.Secret, TagPortUsage(opts))
+	// if err != nil {
+	// 	return err
+	// }
 
 	return AttachToSocket(qs, opts.Interactive)
 }
@@ -234,7 +230,7 @@ func ConnectAndBind(opts *config.Options, inConn *qsocket.Qsocket) error {
 		return err
 	}
 
-	err = qsocket.SendKnockSequence(qs, opts.Secret, TagPortUsage(opts))
+	err = qs.SendKnockSequence(opts.Secret, TagPortUsage(opts))
 	if err != nil {
 		return err
 	}
