@@ -43,7 +43,6 @@ func StartProbingQSRN(opts *config.Options) {
 	)
 
 	go utils.WaitForExitSignal(os.Interrupt)
-
 	for {
 		if !firstProbe {
 			time.Sleep(time.Duration(opts.ProbeInterval) * time.Second)
