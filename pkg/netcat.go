@@ -54,11 +54,7 @@ func StartProbingQSRN(opts *config.Options) {
 		if opts.UseTor {
 			qs, err = qsocket.DialProxy(opts.Secret, TagPortUsage(opts), "127.0.0.1:9050")
 		} else {
-			if opts.DisableTLS {
-				qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts))
-			} else {
-				qs, err = qsocket.DialTLS(opts.Secret, TagPortUsage(opts), opts.CertPinning)
-			}
+			qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts), !opts.DisableTLS, opts.CertPinning)
 		}
 		if err != nil {
 			if err != qsocket.ErrConnRefused {
@@ -171,32 +167,16 @@ func Connect(opts *config.Options) error {
 		spn.Start()
 	}
 
-	var (
-		err error
-		qs  *qsocket.Qsocket
-	)
-
-	if opts.DisableTLS {
-		qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts))
-		if err != nil {
-			return err
-		}
+	qs := &qsocket.Qsocket{}
+	var err error
+	if opts.UseTor {
+		qs, err = qsocket.DialProxy(opts.Secret, TagPortUsage(opts), "127.0.0.1:9050")
 	} else {
-		qs, err = qsocket.DialTLS(opts.Secret, TagPortUsage(opts), opts.CertPinning)
-		if err != nil {
-			return err
-		}
+		qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts), !opts.DisableTLS, opts.CertPinning)
 	}
-
-	// qs, err := qsocket.NewSocket(conn)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// err = qs.SendKnockSequence(opts.Secret, TagPortUsage(opts))
-	// if err != nil {
-	// 	return err
-	// }
+	if err != nil {
+		return err
+	}
 
 	return AttachToSocket(qs, opts.Interactive)
 }
@@ -349,24 +329,34 @@ func DialTLS(addr string, tor, certPinning bool) (net.Conn, error) {
 	return conn, nil
 }
 
-func TagPortUsage(opts *config.Options) uint8 {
-	if opts.Listen &&
-		opts.Interactive &&
-		opts.Execute == "" {
-		return qsocket.TAG_SHELL
-	} else if opts.Listen &&
-		opts.Interactive &&
-		opts.Execute != "" {
-		return qsocket.TAG_EXEC
-	} else if opts.Listen &&
-		opts.ForwardAddr != "" {
-		return qsocket.TAG_PROXY_SERVER
-	} else if opts.Port != 0 {
-		return qsocket.TAG_PROXY_CLIENT
-	} else {
-		return qsocket.TAG_CONNECT
+func TagPortUsage(opts *config.Options) byte {
+	tag := byte(0)
+	switch runtime.GOOS {
+	case "linux":
+		tag = tag | qsocket.TAG_OS_LINUX
+	case "windows":
+		tag = tag | qsocket.TAG_OS_WINDOWS
+	case "darwin":
+		tag = tag | qsocket.TAG_OS_DARWIN
 	}
 
+	switch runtime.GOARCH {
+	case "amd64":
+		tag = tag | qsocket.TAG_ARCH_AMD64
+	case "386":
+		tag = tag | qsocket.TAG_ARCH_386
+	case "arm64":
+		tag = tag | qsocket.TAG_ARCH_ARM64
+	}
+
+	if opts.Listen &&
+		opts.ForwardAddr != "" {
+		tag = tag | qsocket.TAG_ID_PROXY
+	} else {
+		tag = tag | qsocket.TAG_ID_NC
+	}
+
+	return tag
 }
 
 func GetOsShell() string {
