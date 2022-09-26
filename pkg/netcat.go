@@ -136,7 +136,6 @@ func CreateOnConnectPipe(con1 *qsocket.Qsocket, addr string) error {
 }
 
 func ServeToLocal(opts *config.Options) {
-
 	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", opts.Port))
 	if err != nil {
 		logrus.Fatal(err)

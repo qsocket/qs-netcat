@@ -7,7 +7,6 @@ import (
 	"os/signal"
 
 	"github.com/fatih/color"
-	"github.com/sirupsen/logrus"
 )
 
 func PrintFatal(format string, a ...any) {
@@ -38,25 +37,6 @@ func RandomString(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
-}
-
-func WaitForExitSequence(sig os.Signal, exitKey rune) {
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, sig)
-	for {
-		<-sigChan
-		key := make([]byte, 1)
-		_, err := os.Stdin.Read(key)
-		if err != nil {
-			logrus.Debug(err)
-			continue
-		}
-		logrus.Info(key)
-		if string(key) == string(exitKey) {
-			PrintStatus("Exiting...")
-			os.Exit(1)
-		}
-	}
 }
 
 func WaitForExitSignal(sig os.Signal) {
