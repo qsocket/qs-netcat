@@ -15,7 +15,6 @@ import (
 	"github.com/creack/pty"
 	qsocket "github.com/qsocket/qsocket-go"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/term"
 )
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
@@ -56,13 +55,6 @@ func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 		ch <- syscall.SIGWINCH // Initial resize.
 		defer signal.Stop(ch)  // Cleanup signals when done.
 		defer close(ch)
-
-		// Set stdin in raw mode.
-		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-		if err != nil {
-			panic(err)
-		}
-		defer term.Restore(int(os.Stdin.Fd()), oldState) // Best effort.
 
 		// Copy stdin to the pty and the pty to stdout.
 		// NOTE: The goroutine will keep reading until the next keystroke before returning.
