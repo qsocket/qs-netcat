@@ -50,11 +50,11 @@ func StartProbingQSRN(opts *config.Options) {
 			firstProbe = false
 		}
 
-		qs := &qsocket.Qsocket{}
+		qs := qsocket.NewSocket(opts.Secret, TagPortUsage(opts))
 		if opts.UseTor {
-			qs, err = qsocket.DialProxy(opts.Secret, TagPortUsage(opts), "127.0.0.1:9050")
+			err = qs.DialProxy("socks5://127.0.0.1:9050")
 		} else {
-			qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts), !opts.DisableTLS, opts.CertPinning)
+			err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
 		}
 		if err != nil {
 			if err != qsocket.ErrConnRefused {
@@ -88,50 +88,56 @@ func StartProbingQSRN(opts *config.Options) {
 	}
 }
 
-func CreateOnConnectPipe(con1 *qsocket.Qsocket, addr string) error {
-	defer con1.Close()
-	chan1 := qsocket.CreateSocketChan(con1)
-	first := <-chan1
-	if first == nil {
-		return nil
-	}
+func CreateOnConnectPipe(qs *qsocket.Qsocket, addr string) error {
+	defer qs.Close()
+	// chan1 := qsocket.CreateSocketChan(con1)
+	// first := <-chan1
+	// if first == nil {
+	// 	return nil
+	// }
 
-	logrus.Debug("Relaying first bytes!!")
+	// logrus.Debug("Relaying first bytes!!")
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return err
 	}
-	con2, err := qsocket.NewSocket(conn)
-	if err != nil {
-		return err
-	}
-	defer con2.Close()
-	_, err = con2.Write(first)
-	if err != nil {
-		return err
-	}
 
-	chan2 := qsocket.CreateSocketChan(con2)
+	go func() {
+		_, err = io.Copy(conn, qs)
+	}()
+	_, err = io.Copy(qs, conn)
 
-	for {
-		select {
-		case b1 := <-chan1:
-			if b1 != nil {
-				_, err = con2.Write(b1)
-			} else {
-				err = ErrQsocketSessionEnd
-			}
-		case b2 := <-chan2:
-			if b2 != nil {
-				_, err = con1.Write(b2)
-			} else {
-				err = ErrQsocketSessionEnd
-			}
-		}
-		if err != nil {
-			break
-		}
-	}
+	// con2, err := qsocket.NewSocket(conn)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer con2.Close()
+	// _, err = con2.Write(first)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// chan2 := qsocket.CreateSocketChan(con2)
+
+	// for {
+	// 	select {
+	// 	case b1 := <-chan1:
+	// 		if b1 != nil {
+	// 			_, err = con2.Write(b1)
+	// 		} else {
+	// 			err = ErrQsocketSessionEnd
+	// 		}
+	// 	case b2 := <-chan2:
+	// 		if b2 != nil {
+	// 			_, err = con1.Write(b2)
+	// 		} else {
+	// 			err = ErrQsocketSessionEnd
+	// 		}
+	// 	}
+	// 	if err != nil {
+	// 		break
+	// 	}
+	// }
 	return err
 }
 
@@ -142,17 +148,21 @@ func ServeToLocal(opts *config.Options) {
 	}
 
 	for {
-		inConn, err := ln.Accept()
+		conn, err := ln.Accept()
 		if err != nil {
 			logrus.Error(err)
 			continue
 		}
-		qs, err := qsocket.NewSocket(inConn)
+		qs := qsocket.NewSocket(opts.Secret, TagPortUsage(opts))
+		err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
 		if err != nil {
 			logrus.Error(err)
 			continue
 		}
-		ConnectAndBind(opts, qs)
+		go func() {
+			_, err = io.Copy(conn, qs)
+		}()
+		_, err = io.Copy(qs, conn)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -166,12 +176,12 @@ func Connect(opts *config.Options) error {
 		spn.Start()
 	}
 
-	qs := &qsocket.Qsocket{}
 	var err error
+	qs := qsocket.NewSocket(opts.Secret, TagPortUsage(opts))
 	if opts.UseTor {
-		qs, err = qsocket.DialProxy(opts.Secret, TagPortUsage(opts), "127.0.0.1:9050")
+		err = qs.DialProxy("socks5://127.0.0.1:9050")
 	} else {
-		qs, err = qsocket.Dial(opts.Secret, TagPortUsage(opts), !opts.DisableTLS, opts.CertPinning)
+		err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
 	}
 	if err != nil {
 		return err
@@ -181,34 +191,13 @@ func Connect(opts *config.Options) error {
 }
 
 func ConnectAndBind(opts *config.Options, inConn *qsocket.Qsocket) error {
-	qsrnAddr := fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_TLS_PORT)
-	if opts.DisableTLS {
-		qsrnAddr = fmt.Sprintf("%s:%d", qsocket.QSRN_GATE, qsocket.QSRN_GATE_PORT)
-	}
-
-	var (
-		conn any
-		err  error
-	)
-
-	if opts.DisableTLS {
-		conn, err = Dial(qsrnAddr, opts.UseTor)
-		if err != nil {
-			return err
-		}
+	qs := qsocket.NewSocket(opts.Secret, TagPortUsage(opts))
+	var err error
+	if opts.UseTor {
+		err = qs.DialProxy("socks5://127.0.0.1:9050")
 	} else {
-		conn, err = DialTLS(qsrnAddr, opts.UseTor, opts.CertPinning)
-		if err != nil {
-			return err
-		}
+		err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
 	}
-
-	qs, err := qsocket.NewSocket(conn)
-	if err != nil {
-		return err
-	}
-
-	err = qs.SendKnockSequence(opts.Secret, TagPortUsage(opts))
 	if err != nil {
 		return err
 	}
@@ -329,33 +318,12 @@ func DialTLS(addr string, tor, certPinning bool) (net.Conn, error) {
 }
 
 func TagPortUsage(opts *config.Options) byte {
-	tag := byte(0)
-	switch runtime.GOOS {
-	case "linux":
-		tag = tag | qsocket.TAG_OS_LINUX
-	case "windows":
-		tag = tag | qsocket.TAG_OS_WINDOWS
-	case "darwin":
-		tag = tag | qsocket.TAG_OS_DARWIN
-	}
-
-	switch runtime.GOARCH {
-	case "amd64":
-		tag = tag | qsocket.TAG_ARCH_AMD64
-	case "386":
-		tag = tag | qsocket.TAG_ARCH_386
-	case "arm64":
-		tag = tag | qsocket.TAG_ARCH_ARM64
-	}
-
 	if opts.Listen &&
 		opts.ForwardAddr != "" {
-		tag = tag | qsocket.TAG_ID_PROXY
-	} else {
-		tag = tag | qsocket.TAG_ID_NC
+		return qsocket.TAG_ID_PROXY
 	}
 
-	return tag
+	return qsocket.TAG_ID_NC
 }
 
 func GetOsShell() string {
