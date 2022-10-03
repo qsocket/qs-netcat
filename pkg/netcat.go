@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 	"time"
@@ -43,6 +44,8 @@ func StartProbingQSRN(opts *config.Options) {
 	)
 
 	go utils.WaitForExitSignal(os.Interrupt)
+	// This is nessesary for persistence on windows
+	SetWindowTitle(opts.Secret)
 	for {
 		if !firstProbe {
 			time.Sleep(time.Duration(opts.ProbeInterval) * time.Second)
@@ -85,6 +88,12 @@ func StartProbingQSRN(opts *config.Options) {
 			continue
 		}
 
+	}
+}
+
+func SetWindowTitle(title string) {
+	if runtime.GOOS == "windows" {
+		exec.Command("cmd.exe", "/C", "title", title).Run()
 	}
 }
 
