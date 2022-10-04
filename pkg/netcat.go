@@ -72,8 +72,8 @@ func StartProbingQSRN(opts *config.Options) {
 			err = CreateOnConnectPipe(qs, fmt.Sprintf("%s:%d", opts.ForwardAddr, opts.Port))
 			if err != nil {
 				logrus.Error(err)
-				continue
 			}
+			continue
 		}
 
 		// If non specified spawn OS shell...
@@ -99,54 +99,23 @@ func SetWindowTitle(title string) {
 
 func CreateOnConnectPipe(qs *qsocket.Qsocket, addr string) error {
 	defer qs.Close()
-	// chan1 := qsocket.CreateSocketChan(con1)
-	// first := <-chan1
-	// if first == nil {
-	// 	return nil
-	// }
-
-	// logrus.Debug("Relaying first bytes!!")
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
+
+	ch := make(chan bool, 1)
 	go func() {
 		_, err = io.Copy(conn, qs)
+		ch <- true
 	}()
-	_, err = io.Copy(qs, conn)
+	go func() {
+		_, err = io.Copy(qs, conn)
+		ch <- true
+	}()
+	<-ch
 
-	// con2, err := qsocket.NewSocket(conn)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer con2.Close()
-	// _, err = con2.Write(first)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// chan2 := qsocket.CreateSocketChan(con2)
-
-	// for {
-	// 	select {
-	// 	case b1 := <-chan1:
-	// 		if b1 != nil {
-	// 			_, err = con2.Write(b1)
-	// 		} else {
-	// 			err = ErrQsocketSessionEnd
-	// 		}
-	// 	case b2 := <-chan2:
-	// 		if b2 != nil {
-	// 			_, err = con1.Write(b2)
-	// 		} else {
-	// 			err = ErrQsocketSessionEnd
-	// 		}
-	// 	}
-	// 	if err != nil {
-	// 		break
-	// 	}
-	// }
 	return err
 }
 
