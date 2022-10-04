@@ -110,7 +110,7 @@ func CreateOnConnectPipe(qs *qsocket.Qsocket, addr string) error {
 	if err != nil {
 		return err
 	}
-
+	defer conn.Close()
 	go func() {
 		_, err = io.Copy(conn, qs)
 	}()
@@ -175,6 +175,8 @@ func ServeToLocal(opts *config.Options) {
 		if err != nil {
 			logrus.Error(err)
 		}
+		qs.Close()
+		conn.Close()
 	}
 }
 
