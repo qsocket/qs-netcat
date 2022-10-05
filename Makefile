@@ -5,7 +5,8 @@ BUILD_FLAGS=-trimpath -buildvcs=false --ldflags "-s -w -X github.com/qsocket/qs-
 CGO_ENABLED=0
 $(shell mkdir -p build/{windows,linux,darwin,android,ios,freebsd,openbsd,solaris,aix,illumos,dragonfly})
 
-default: linux
+default:
+	${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/qs-netcat
 windows:
 	GOOS=windows GOARCH=amd64 ${BUILD} -ldflags "-H windowsgui" ${BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-amd64.exe
 	GOOS=windows GOARCH=386 ${BUILD} -ldflags "-H windowsgui" ${BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-386.exe
