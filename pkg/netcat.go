@@ -24,12 +24,6 @@ import (
 	"golang.org/x/term"
 )
 
-const (
-	// OS Spesific binaries
-	WIN_SHELL = "cmd.exe"
-	NIX_SHELL = "/bin/bash -il"
-)
-
 var (
 	ErrQsocketSessionEnd = errors.New("Qsocket session has ended")
 	ErrTtyFailed         = errors.New("TTY initialization failed")
@@ -78,7 +72,7 @@ func StartProbingQSRN(opts *config.Options) {
 
 		// If non specified spawn OS shell...
 		if opts.Execute == "" {
-			opts.Execute = GetOsShell()
+			opts.Execute = OS_SHELL
 		}
 
 		// Execute command/program and redirect stdin/out/err
@@ -304,15 +298,4 @@ func TagPortUsage(opts *config.Options) byte {
 	}
 
 	return qsocket.TAG_ID_NC
-}
-
-func GetOsShell() string {
-	switch runtime.GOOS {
-	case "linux", "darwin", "android", "freebsd", "ios", "netbsd", "openbsd", "solaris":
-		return NIX_SHELL
-	case "windows":
-		return WIN_SHELL
-	default:
-		return NIX_SHELL
-	}
 }

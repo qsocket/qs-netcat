@@ -17,6 +17,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const OS_SHELL = "/bin/bash -il"
+
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	params := strings.Split(comm, " ")
 	cmd := &exec.Cmd{}

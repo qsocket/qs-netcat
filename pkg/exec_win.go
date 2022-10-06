@@ -16,6 +16,8 @@ import (
 	"golang.org/x/term"
 )
 
+const OS_SHELL = "cmd.exe"
+
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	params := strings.Split(comm, " ")
 	cmd := &exec.Cmd{}
