@@ -6,7 +6,7 @@ require (
 	github.com/briandowns/spinner v1.19.0
 	github.com/creack/pty v1.1.18
 	github.com/fatih/color v1.13.0
-	github.com/qsocket/qsocket-go v0.0.0-20220928145839-199d05723e78
+	github.com/qsocket/qsocket-go v0.0.0-20221006180316-2d534bc94415
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/net v0.0.0-20220927171203-f486391704dc
 	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035

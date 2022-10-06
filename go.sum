@@ -23,6 +23,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/qsocket/qsocket-go v0.0.0-20220928145839-199d05723e78 h1:7tjBQrx39Rg+G+rFf7TPpZ7FGHrnMhVgvtbICu/BPj8=
 github.com/qsocket/qsocket-go v0.0.0-20220928145839-199d05723e78/go.mod h1:G2kaDAp9R8mXoLKUU5/zJKU0JfN14B0t+qbnI+1FWvw=
+github.com/qsocket/qsocket-go v0.0.0-20221006180316-2d534bc94415 h1:LALAukKLuxv20P7HoPZmdSPerl0yw+tU7OowLuRU8nM=
+github.com/qsocket/qsocket-go v0.0.0-20221006180316-2d534bc94415/go.mod h1:G2kaDAp9R8mXoLKUU5/zJKU0JfN14B0t+qbnI+1FWvw=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
