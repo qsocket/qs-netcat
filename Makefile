@@ -47,7 +47,7 @@ android: # android builds require native development kit
 	CC=$NDK_ROOT/21.3.6528147/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang GOOS=android GOARCH=arm64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/android/qs-netcat-arm64
 ios:
 	GOOS=ios GOARCH=amd64 CGO_ENABLED=1 CC=${CURRET_DIR}/clangwrap.sh ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/ios/qs-netcat-amd64
-	GOOS=ios GOARCH=arm CGO_ENABLED=1 CC=${CURRET_DIR}/clangwrap.sh ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/ios/qs-netcat-arm64
+	GOOS=ios GOARCH=arm64 CGO_ENABLED=1 CC=${CURRET_DIR}/clangwrap.sh ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/ios/qs-netcat-arm64
 darwin:
 	GOOS=darwin GOARCH=amd64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/darwin/qs-netcat-amd64
 	GOOS=darwin GOARCH=arm64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/darwin/qs-netcat-arm64
