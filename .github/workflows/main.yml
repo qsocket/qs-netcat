@@ -1,5 +1,5 @@
 
-name: Makefile CI
+name: build
 
 on:
   push:
