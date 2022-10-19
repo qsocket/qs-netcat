@@ -59,6 +59,7 @@ aix:
 	GOOS=aix GOARCH=ppc64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/aix/qs-netcat-ppc64
 dragonfly:
 	GOOS=dragonfly GOARCH=amd64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/dragonfly/qs-netcat-amd64
-
+clean:
+	rm -rfv ./build
 
 all: linux windows darwin freebsd openbsd netbsd solaris aix dragonfly illumos # android ios 
