@@ -15,7 +15,7 @@ import (
 var (
 	Version  = "?"
 	usageStr = `
-qs-netcat [-liC] [-e cmd] [-p port]
+qs-netcat [OPTIONS]
 Version: %s
 	-s <secret>  Secret. (e.g. password).
 	-l           Listening server. [default: client]

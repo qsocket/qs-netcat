@@ -28,8 +28,8 @@
 [workflow]: https://github.com/qsocket/qs-netcat/actions/workflows/main.yml
 [qsrn]: https://github.com/qsocket/qsrn
 
-qs-netcat is a cross-platform networking utility which reads and writes data across systems using the [QSRN](qsrn). 
-It allows redirecting true PTY session with reverse connections effectively backdooring systems, creating TCP proxies, and transfering files to/from systems under NAT networks.
+qs-netcat is a cross-platform networking utility which reads and writes data across systems using the [QSRN](qsrn).
+It allows redirecting true PTY sessions with reverse connections, effectively backdooring systems, creating TCP proxies, and transferring files to and from systems under NAT networks.
 
 ## Installation
 
@@ -75,7 +75,7 @@ docker run -it egee/qsocket
 ## Usage
 
 ```
-qs-netcat [-liC] [-e cmd] [-p port]
+qs-netcat [OPTIONS]
 Version: v1.0.1660145903-1696aab
 	-s <secret>  Secret. (e.g. password).
 	-l           Listening server. [default: client]
