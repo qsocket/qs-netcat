@@ -23,7 +23,7 @@ Version: %s
 	-C           Disable encryption.
 	-t           Probe interval for QSRN. (5s)
 	-T           Use TOR.
-	-f <IP>      IPv4 address for port forwarding.
+	-f <IP>      IP address for port forwarding.
 	-p <port>    Port to listen on or forward to.
 	-i           Interactive login shell. (TTY) [Ctrl-e q to terminate]
 	-e <cmd>     Execute command. [e.g. "bash -il" or "cmd.exe"]
