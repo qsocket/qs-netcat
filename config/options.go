@@ -128,7 +128,7 @@ func ConfigureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 	}
 
 	if opts.ForwardAddr != "" && opts.Port == 0 {
-		return nil, errors.New("Please specify a valid port number.")
+		return nil, errors.New("please specify a valid port number")
 	}
 
 	if opts.Verbose {
