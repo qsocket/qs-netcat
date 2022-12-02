@@ -180,8 +180,7 @@ func ConnectAndBind(opts *config.Options, inConn *qsocket.Qsocket) error {
 }
 
 func AttachToSocket(conn *qsocket.Qsocket, interactive bool) error {
-
-	var err error
+	defer conn.Close()
 	if interactive {
 		spn.Suffix = " Setting up TTY terminal..."
 		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
@@ -192,35 +191,40 @@ func AttachToSocket(conn *qsocket.Qsocket, interactive bool) error {
 	}
 
 	spn.Stop()
-	go func() {
-		for {
-			logrus.Debug("Reading from stdin...")
-			n, readErr := io.Copy(conn, os.Stdin)
-			if readErr != nil {
-				err = readErr
-				return
-			}
-			if n == 0 {
-				logrus.Warn(ErrQsocketSessionEnd)
-				break
-			}
-		}
-	}()
+	go func() { io.Copy(conn, os.Stdin) }()
+	io.Copy(os.Stdout, conn)
 
-	for {
-		logrus.Debug("Reading from socket...")
-		//_, err = writer2.ReadFrom(conn)
-		n, writeErr := io.Copy(os.Stdout, conn)
-		if writeErr != nil {
-			err = writeErr
-			break
-		}
-		if n == 0 {
-			logrus.Warn(ErrQsocketSessionEnd)
-			break
-		}
-	}
-	return err
+	// go func() {
+	// 	for {
+	// 		logrus.Debug("Reading from stdin...")
+	// 		n, readErr := io.Copy(conn, os.Stdin)
+	// 		if readErr != nil {
+	// 			err = readErr
+	// 			logrus.Error("returning...")
+	// 			return
+	// 		}
+	// 		if n == 0 {
+	// 			logrus.Warn(ErrQsocketSessionEnd)
+	// 			break
+	// 		}
+	// 	}
+	// }()
+
+	// for {
+	// 	logrus.Debug("Reading from socket...")
+	// 	//_, err = writer2.ReadFrom(conn)
+	// 	n, writeErr := io.Copy(os.Stdout, conn)
+	// 	if writeErr != nil {
+	// 		logrus.Error("returning2...")
+	// 		err = writeErr
+	// 		break
+	// 	}
+	// 	if n == 0 {
+	// 		logrus.Warn(ErrQsocketSessionEnd)
+	// 		break
+	// 	}
+	// }
+	return nil
 }
 
 func Dial(addr string, tor bool) (net.Conn, error) {

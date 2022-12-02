@@ -4,6 +4,7 @@
 package qsnetcat
 
 import (
+	"context"
 	"errors"
 	"io"
 	"os"
@@ -11,18 +12,17 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/creack/pty"
+	conpty "github.com/EgeBalci/conpty-go"
 	qsocket "github.com/qsocket/qsocket-go"
-	"golang.org/x/term"
 )
 
 const OS_SHELL = "cmd.exe"
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
-	params := strings.Split(comm, " ")
-	cmd := &exec.Cmd{}
 	defer conn.Close()
-
+	params := strings.Split(comm, " ")
+	cmd := &exec.Cmd{Env: os.Environ()}
+	defer conn.Close()
 	if len(params) == 0 {
 		return errors.New("no command specified")
 	} else if len(params) == 1 {
@@ -30,50 +30,21 @@ func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	} else {
 		cmd = exec.Command(params[0], params[1:]...)
 	}
-	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true} // Hide new process window
-
 	if interactive {
-		// Start the command with a pty.
-		ptmx, err := pty.Start(cmd)
+		cpty, err := conpty.Start(comm)
 		if err != nil {
 			return err
 		}
+		defer cpty.Close()
 
-		// Make sure to close the pty at the end.
-		defer ptmx.Close() // Best effort.
+		go func() {
+			go io.Copy(conn, cpty)
+			io.Copy(cpty, conn)
+		}()
 
-		// Handle pty size.
-		// ch := make(chan os.Signal, 1)
-		// signal.Notify(ch, syscall.SIGWINCH)
-		// go func() {
-		// 	for range ch {
-		// 		if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
-		// 			logrus.Errorf("error resizing pty: %s", err)
-		// 		}
-		// 	}
-		// }()
-		// ch <- syscall.SIGWINCH // Initial resize.
-		// defer signal.Stop(ch)  // Cleanup signals when done.
-		// defer close(ch)
-
-		err = pty.InheritSize(os.Stdin, ptmx)
-		if err != nil {
-			return err
-		}
-
-		// Set stdin in raw mode.
-		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-		if err != nil {
-			panic(err)
-		}
-		defer term.Restore(int(os.Stdin.Fd()), oldState) // Best effort.
-
-		// Copy stdin to the pty and the pty to stdout.
-		// NOTE: The goroutine will keep reading until the next keystroke before returning.
-		go func() { io.Copy(ptmx, conn) }()
-		io.Copy(conn, ptmx)
-		return nil
+		_, err = cpty.Wait(context.Background())
+		return err
 	}
 
 	cmd.Stdin = conn

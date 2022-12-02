@@ -2,15 +2,16 @@ CURRET_DIR=$(shell pwd)
 BUILD=CGO_ENABLED=0 go build
 OUT_DIR=${CURRET_DIR}/build
 BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-extldflags=-static -s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git log --pretty=format:'v1.0.%at-%h' -n 1)" 
+WIN_BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-H windowsgui -s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git log --pretty=format:'v1.0.%at-%h' -n 1)" 
 $(shell mkdir -p build/{windows,linux,darwin,android,ios,freebsd,openbsd,solaris,aix,illumos,dragonfly})
 
 default:
 	${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/qs-netcat
 windows:
-	GOOS=windows GOARCH=amd64 ${BUILD} -ldflags "-H windowsgui" ${BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-amd64.exe
-	GOOS=windows GOARCH=386 ${BUILD} -ldflags "-H windowsgui" ${BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-386.exe
-	GOOS=windows GOARCH=arm ${BUILD} -ldflags "-H windowsgui" ${BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-arm.exe
-	GOOS=windows GOARCH=arm64 ${BUILD} -ldflags "-H windowsgui" ${BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-arm64.exe
+	GOOS=windows GOARCH=amd64 ${BUILD} ${WIN_BUILD_FLAGS}  -o ${OUT_DIR}/windows/qs-netcat-amd64.exe
+	GOOS=windows GOARCH=386 ${BUILD} ${WIN_BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-386.exe
+	GOOS=windows GOARCH=arm ${BUILD} ${WIN_BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-arm.exe
+	GOOS=windows GOARCH=arm64 ${BUILD} ${WIN_BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-arm64.exe
 linux:
 	GOOS=linux GOARCH=amd64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/linux/qs-netcat-amd64
 	GOOS=linux GOARCH=386 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/linux/qs-netcat-386
