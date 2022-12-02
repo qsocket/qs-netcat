@@ -21,9 +21,9 @@ const OS_SHELL = "/bin/bash -il"
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	params := strings.Split(comm, " ")
-	cmd := &exec.Cmd{}
+	os.Setenv("HISTFILE", "/dev/null")
+	cmd := &exec.Cmd{Env: os.Environ()}
 	defer conn.Close()
-
 	if len(params) == 0 {
 		return errors.New("no command specified")
 	} else if len(params) == 1 {
@@ -31,8 +31,6 @@ func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	} else {
 		cmd = exec.Command(params[0], params[1:]...)
 	}
-	os.Setenv("HISTFILE", "/dev/null")
-	cmd.Env = append(cmd.Env, os.Environ()...)
 
 	if interactive {
 		// Start the command with a pty.
@@ -60,8 +58,10 @@ func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 
 		// Copy stdin to the pty and the pty to stdout.
 		// NOTE: The goroutine will keep reading until the next keystroke before returning.
-		go func() { io.Copy(ptmx, conn) }()
-		io.Copy(conn, ptmx)
+		sigEnd := make(chan error, 2)
+		go func() { _, err := io.Copy(ptmx, conn); sigEnd <- err }()
+		go func() { _, err := io.Copy(conn, ptmx); sigEnd <- err }()
+		<-sigEnd
 		return nil
 	}
 
