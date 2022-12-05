@@ -105,7 +105,7 @@ Example for a reverse shell:
 ### Examples
 - SSH from *Workstation B* to *Workstation A* through any firewall/NAT
 ```bash
-$ qs-netcat -f "localhost" -p 22 -l     # Workstation A
+$ qs-netcat -f "localhost" -p 22 -l  # Workstation A
 $ qsocket ssh root@qsocket.io        # Workstation B
 ```
 - Log in to Workstation A from Workstation B through any firewall/NAT
