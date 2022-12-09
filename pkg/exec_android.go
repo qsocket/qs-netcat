@@ -1,5 +1,5 @@
-//go:build !windows && !android
-// +build !windows,!android
+//go:build android
+// +build android
 
 package qsnetcat
 
@@ -15,9 +15,10 @@ import (
 	"github.com/creack/pty"
 	qsocket "github.com/qsocket/qsocket-go"
 	"github.com/sirupsen/logrus"
+	_ "golang.org/x/mobile/app"
 )
 
-const OS_SHELL = "/bin/bash -il"
+const OS_SHELL = "sh"
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	defer conn.Close()
