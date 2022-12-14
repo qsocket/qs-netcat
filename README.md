@@ -67,9 +67,9 @@ qs-netcat supports 10 architectures and 12 operating systems, check **Supported 
 
 [![Docker](http://dockeri.co/image/egee/qsocket)](https://hub.docker.com/r/egee/qsocket/)
 
-```
-docker pull egee/qsocket
-docker run -it egee/qsocket qs-netcat
+```bash
+docker pull qsocket/qs-netcat
+docker run -it qsocket/qs-netcat -h
 ```
 
 ## Usage
