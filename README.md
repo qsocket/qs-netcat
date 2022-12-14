@@ -69,21 +69,21 @@ qs-netcat supports 10 architectures and 12 operating systems, check **Supported 
 
 ```
 docker pull egee/qsocket
-docker run -it egee/qsocket
+docker run -it egee/qsocket qs-netcat
 ```
 
 ## Usage
 
 ```
 qs-netcat [OPTIONS]
-Version: v1.0.1660145903-1696aab
+Version: v1.0.1670588810-1cd49df
 	-s <secret>  Secret. (e.g. password).
 	-l           Listening server. [default: client]
 	-g           Generate a Secret. (random)
 	-C           Disable encryption.
 	-t           Probe interval for QSRN. (5s)
 	-T           Use TOR.
-	-f <IP>      IPv4 address for port forwarding.
+	-f <IP>      IP address for port forwarding.
 	-p <port>    Port to listen on or forward to.
 	-i           Interactive login shell. (TTY) [Ctrl-e q to terminate]
 	-e <cmd>     Execute command. [e.g. "bash -il" or "cmd.exe"]
