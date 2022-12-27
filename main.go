@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-
 	// Create a FlagSet and sets the usage
 	fs := flag.NewFlagSet(filepath.Base(os.Args[0]), flag.ExitOnError)
 	// Configure the options from the flags/config file
