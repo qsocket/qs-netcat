@@ -15,7 +15,7 @@ import (
 	"github.com/creack/pty"
 	qsocket "github.com/qsocket/qsocket-go"
 	"github.com/sirupsen/logrus"
-	_ "golang.org/x/mobile/app"
+	// _ "golang.org/x/mobile/app"
 )
 
 const OS_SHELL = "sh"

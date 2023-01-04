@@ -3,6 +3,7 @@ module github.com/qsocket/qs-netcat
 go 1.18
 
 require (
+	github.com/EgeBalci/conpty-go v0.0.0-20221202212158-49aaf13b204d
 	github.com/briandowns/spinner v1.19.0
 	github.com/creack/pty v1.1.18
 	github.com/fatih/color v1.13.0
@@ -13,14 +14,9 @@ require (
 )
 
 require (
-	github.com/EgeBalci/conpty-go v0.0.0-20221202212158-49aaf13b204d // indirect
-	github.com/UserExistsError/conpty v0.1.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
-	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b // indirect
-	golang.org/x/mobile v0.0.0-20221110043201-43a038452099 // indirect
-	golang.org/x/sys v0.2.0 // indirect
+	github.com/mattn/go-isatty v0.0.16 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 )

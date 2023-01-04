@@ -47,6 +47,7 @@ android: # android builds require native development kit
 	CC="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android${ANDROID_API}-clang" GOOS=android GOARCH=386 ${ANDROID_BUILD} -o ${OUT_DIR}/android/qs-netcat-386
 	CC="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi${ANDROID_API}-clang" GOOS=android GOARCH=arm ${ANDROID_BUILD} -o ${OUT_DIR}/android/qs-netcat-arm
 	CC="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_API}-clang" GOOS=android GOARCH=arm64 ${ANDROID_BUILD} -o ${OUT_DIR}/android/qs-netcat-arm64
+android-apk:	
 	gomobile build -target android -androidapi ${ANDROID_API} -o ${OUT_DIR}/android/qs-netcat.apk
 ios:
 	GOOS=ios GOARCH=amd64 CGO_ENABLED=1 CC=${CURRET_DIR}/clangwrap.sh ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/ios/qs-netcat-amd64
