@@ -7,10 +7,10 @@ require (
 	github.com/briandowns/spinner v1.19.0
 	github.com/creack/pty v1.1.18
 	github.com/fatih/color v1.13.0
-	github.com/qsocket/qsocket-go v0.0.0-20221006180316-2d534bc94415
+	github.com/qsocket/qsocket-go v0.0.0-20230106150224-92864bad3c77
 	github.com/sirupsen/logrus v1.9.0
-	golang.org/x/net v0.0.0-20220927171203-f486391704dc
-	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035
+	golang.org/x/net v0.5.0
+	golang.org/x/term v0.4.0
 )
 
 require (
@@ -18,5 +18,5 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
-	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
 )

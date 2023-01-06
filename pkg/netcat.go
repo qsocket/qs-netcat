@@ -32,22 +32,13 @@ var (
 )
 
 func StartProbingQSRN(opts *config.Options) {
-	var (
-		err        error
-		firstProbe = true
-	)
-
+	var err error
 	go utils.WaitForExitSignal(os.Interrupt)
 	// This is nessesary for persistence on windows
 	SetWindowTitle(opts.Secret)
+	time.Sleep(time.Duration(opts.ProbeInterval) * time.Second)
 	for {
-		if !firstProbe {
-			time.Sleep(time.Duration(opts.ProbeInterval) * time.Second)
-		} else {
-			firstProbe = false
-		}
-
-		qs := qsocket.NewSocket(opts.Secret, TagPortUsage(opts))
+		qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
 		if opts.UseTor {
 			err = qs.DialProxy("socks5://127.0.0.1:9050")
 		} else {
@@ -125,7 +116,7 @@ func ServeToLocal(opts *config.Options) {
 			logrus.Error(err)
 			continue
 		}
-		qs := qsocket.NewSocket(opts.Secret, TagPortUsage(opts))
+		qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
 		err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
 		if err != nil {
 			logrus.Error(err)
@@ -151,7 +142,7 @@ func Connect(opts *config.Options) error {
 	}
 
 	var err error
-	qs := qsocket.NewSocket(opts.Secret, TagPortUsage(opts))
+	qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
 	if opts.UseTor {
 		err = qs.DialProxy("socks5://127.0.0.1:9050")
 	} else {
@@ -165,7 +156,7 @@ func Connect(opts *config.Options) error {
 }
 
 func ConnectAndBind(opts *config.Options, inConn *qsocket.Qsocket) error {
-	qs := qsocket.NewSocket(opts.Secret, TagPortUsage(opts))
+	qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
 	var err error
 	if opts.UseTor {
 		err = qs.DialProxy("socks5://127.0.0.1:9050")
@@ -295,11 +286,16 @@ func DialTLS(addr string, tor, certPinning bool) (net.Conn, error) {
 	return conn, nil
 }
 
-func TagPortUsage(opts *config.Options) byte {
-	if opts.Listen &&
-		opts.ForwardAddr != "" {
-		return qsocket.TAG_ID_PROXY
+func GetPeerTag(opts *config.Options) byte {
+	tag := byte(qsocket.TAG_PEER_CLI)
+	if opts.Listen {
+		tag = qsocket.TAG_PEER_SRV
 	}
 
-	return qsocket.TAG_ID_NC
+	if opts.Port != 0 ||
+		opts.ForwardAddr != "" {
+		return qsocket.TAG_PEER_PROXY
+	}
+
+	return tag
 }
