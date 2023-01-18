@@ -128,6 +128,6 @@ https://user-images.githubusercontent.com/1161307/171013513-95f18734-233d-45d3-a
 <details>
 <summary>RDP connection over QSRN</summary>
 
-https://user-images.githubusercontent.com/1161307/171013513-95f18734-233d-45d3-aaf5-d6aec687db0e.mov
+https://user-images.githubusercontent.com/17179401/213314447-65ecaf43-89fd-48bd-a242-3345f6baf185.mov
 
 </details>
