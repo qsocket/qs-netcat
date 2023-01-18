@@ -30,11 +30,6 @@ func main() {
 		return
 	}
 
-	if opts.Port != 0 {
-		qsnetcat.ServeToLocal(opts)
-		return
-	}
-
 	err = qsnetcat.Connect(opts)
 	if err != nil {
 		logrus.Error(err)

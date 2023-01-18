@@ -130,6 +130,11 @@ func ServeToLocal(opts *config.Options) {
 }
 
 func Connect(opts *config.Options) error {
+	if opts.ForwardAddr != "" {
+		ServeToLocal(opts)
+		return nil
+	}
+
 	defer spn.Stop()
 	if !opts.Quiet {
 		spn.Suffix = " Dialing qsocket relay network..."

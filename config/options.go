@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -124,10 +123,6 @@ func ConfigureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 			opts.RandomSecret = true
 		}
 		// print("\n==============================================\n")
-	}
-
-	if opts.ForwardAddr != "" && opts.Port == 0 {
-		return nil, errors.New("please specify a valid port number")
 	}
 
 	if opts.Verbose {
