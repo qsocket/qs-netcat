@@ -8,7 +8,6 @@
 # Build directory
 build/
 release/
-mkrelease.sh
 
 # Test binary, built with `go test -c`
 *.test
