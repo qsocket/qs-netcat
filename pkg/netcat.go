@@ -40,7 +40,7 @@ func StartProbingQSRN(opts *config.Options) {
 	for {
 		qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
 		if opts.UseTor {
-			err = qs.DialProxy("socks5://127.0.0.1:9050")
+			err = qs.DialProxy("127.0.0.1:9050")
 		} else {
 			err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
 		}
