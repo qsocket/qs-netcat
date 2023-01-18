@@ -2,7 +2,7 @@ CURRET_DIR=$(shell pwd)
 BUILD=CGO_ENABLED=0 go build
 OUT_DIR=${CURRET_DIR}/build
 BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-extldflags=-static -s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git log --pretty=format:'v1.0.%at-%h' -n 1)" 
-WIN_BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-H windowsgui -s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git log --pretty=format:'v1.0.%at-%h' -n 1)" 
+WIN_BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-H windowsgui -s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git log --pretty=format:'v1.0.%at-%h' -n 1)"
 ANDROID_API=33
 ANDROID_BUILD=CGO_ENABLED=1 go build -trimpath -buildvcs=false -ldflags="-s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git log --pretty=format:'v1.0.%at-%h' -n 1)"
 $(shell mkdir -p build/{windows,linux,darwin,android,ios,freebsd,openbsd,solaris,aix,illumos,dragonfly})

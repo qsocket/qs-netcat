@@ -5,10 +5,10 @@ package qsnetcat
 
 import (
 	"context"
-	"errors"
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -16,18 +16,18 @@ import (
 	qsocket "github.com/qsocket/qsocket-go"
 )
 
-const OS_SHELL = "cmd.exe"
+const SHELL = "cmd.exe"
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	defer conn.Close()
 	params := strings.Split(comm, " ")
-	cmd := &exec.Cmd{Env: os.Environ()}
-	defer conn.Close()
-	if len(params) == 0 {
-		return errors.New("no command specified")
-	} else if len(params) == 1 {
-		cmd = exec.Command(params[0])
-	} else {
+	ncDir, err := filepath.Abs(os.Args[0])
+	if err != nil {
+		return err
+	}
+	os.Setenv("qs-netcat", ncDir)
+	cmd := exec.Command(params[0])
+	if len(params) > 1 {
 		cmd = exec.Command(params[0], params[1:]...)
 	}
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true} // Hide new process window

@@ -4,11 +4,11 @@
 package qsnetcat
 
 import (
-	"errors"
 	"io"
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -18,18 +18,19 @@ import (
 	// _ "golang.org/x/mobile/app"
 )
 
-const OS_SHELL = "sh"
+const SHELL = "sh"
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	defer conn.Close()
 	params := strings.Split(comm, " ")
+	ncDir, err := filepath.Abs(os.Args[0])
+	if err != nil {
+		return err
+	}
+	os.Setenv("qs-netcat", ncDir)
 	os.Setenv("HISTFILE", "/dev/null")
-	cmd := &exec.Cmd{Env: os.Environ()}
-	if len(params) == 0 {
-		return errors.New("no command specified")
-	} else if len(params) == 1 {
-		cmd = exec.Command(params[0])
-	} else {
+	cmd := exec.Command(params[0])
+	if len(params) > 1 {
 		cmd = exec.Command(params[0], params[1:]...)
 	}
 
