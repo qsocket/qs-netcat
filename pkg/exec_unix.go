@@ -17,7 +17,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const OS_SHELL = "/bin/bash -il"
+const SHELL = "/bin/bash -il"
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	defer conn.Close()

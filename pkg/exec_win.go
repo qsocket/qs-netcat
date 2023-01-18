@@ -16,7 +16,7 @@ import (
 	qsocket "github.com/qsocket/qsocket-go"
 )
 
-const OS_SHELL = "cmd.exe"
+const SHELL = "cmd.exe"
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	defer conn.Close()

@@ -18,7 +18,7 @@ import (
 	// _ "golang.org/x/mobile/app"
 )
 
-const OS_SHELL = "sh"
+const SHELL = "sh"
 
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	defer conn.Close()

@@ -63,7 +63,7 @@ func StartProbingQSRN(opts *config.Options) {
 
 		// If non specified spawn OS shell...
 		if opts.Execute == "" {
-			opts.Execute = OS_SHELL
+			opts.Execute = SHELL
 		}
 
 		// Execute command/program and redirect stdin/out/err
