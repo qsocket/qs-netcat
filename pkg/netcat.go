@@ -1,11 +1,7 @@
 package qsnetcat
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"crypto/tls"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"os"
@@ -20,7 +16,6 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/proxy"
 	"golang.org/x/term"
 )
 
@@ -54,7 +49,7 @@ func StartProbingQSRN(opts *config.Options) {
 		// First check if forwarding enabled
 		if opts.ForwardAddr != "" {
 			// Redirect traffic to forward addr
-			err = CreateOnConnectPipe(qs, fmt.Sprintf("%s:%d", opts.ForwardAddr, opts.Port))
+			err = CreateOnConnectPipe(qs, opts.ForwardAddr)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -105,7 +100,7 @@ func CreateOnConnectPipe(qs *qsocket.Qsocket, addr string) error {
 }
 
 func ServeToLocal(opts *config.Options) {
-	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", opts.Port))
+	ln, err := net.Listen("tcp", opts.ForwardAddr)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -155,21 +150,6 @@ func Connect(opts *config.Options) error {
 	return AttachToSocket(qs, opts.Interactive)
 }
 
-func ConnectAndBind(opts *config.Options, inConn *qsocket.Qsocket) error {
-	qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
-	var err error
-	if opts.UseTor {
-		err = qs.DialProxy("socks5://127.0.0.1:9050")
-	} else {
-		err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
-	}
-	if err != nil {
-		return err
-	}
-
-	return qsocket.BindSockets(qs, inConn)
-}
-
 func AttachToSocket(conn *qsocket.Qsocket, interactive bool) error {
 	defer conn.Close()
 	if interactive {
@@ -184,106 +164,7 @@ func AttachToSocket(conn *qsocket.Qsocket, interactive bool) error {
 	spn.Stop()
 	go func() { io.Copy(conn, os.Stdin) }()
 	io.Copy(os.Stdout, conn)
-
-	// go func() {
-	// 	for {
-	// 		logrus.Debug("Reading from stdin...")
-	// 		n, readErr := io.Copy(conn, os.Stdin)
-	// 		if readErr != nil {
-	// 			err = readErr
-	// 			logrus.Error("returning...")
-	// 			return
-	// 		}
-	// 		if n == 0 {
-	// 			logrus.Warn(ErrQsocketSessionEnd)
-	// 			break
-	// 		}
-	// 	}
-	// }()
-
-	// for {
-	// 	logrus.Debug("Reading from socket...")
-	// 	//_, err = writer2.ReadFrom(conn)
-	// 	n, writeErr := io.Copy(os.Stdout, conn)
-	// 	if writeErr != nil {
-	// 		logrus.Error("returning2...")
-	// 		err = writeErr
-	// 		break
-	// 	}
-	// 	if n == 0 {
-	// 		logrus.Warn(ErrQsocketSessionEnd)
-	// 		break
-	// 	}
-	// }
 	return nil
-}
-
-func Dial(addr string, tor bool) (net.Conn, error) {
-	if tor {
-		proxyDialer, err := proxy.SOCKS5("tcp", "127.0.0.1:9050", nil,
-			&net.Dialer{
-				Timeout:   10 * time.Second,
-				KeepAlive: 10 * time.Second,
-			},
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		conn, err := proxyDialer.Dial("tcp", addr)
-		if err != nil {
-			return nil, err
-		}
-		return conn, nil
-
-	}
-
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
-}
-
-func DialTLS(addr string, tor, certPinning bool) (net.Conn, error) {
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
-	}
-
-	if tor {
-		proxyDialer, err := proxy.SOCKS5("tcp", "127.0.0.1:9050", nil,
-			&net.Dialer{
-				Timeout:   10 * time.Second,
-				KeepAlive: 10 * time.Second,
-			},
-		)
-		if err != nil {
-			return nil, err
-		}
-		conn, err := proxyDialer.Dial("tcp", addr)
-		if err != nil {
-			return nil, err
-		}
-		return tls.Client(conn, tlsConfig), nil
-
-	}
-	conn, err := tls.Dial("tcp", addr, tlsConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	if certPinning {
-		connState := conn.ConnectionState()
-		for _, peerCert := range connState.PeerCertificates {
-			hash := sha256.Sum256(peerCert.Raw)
-			if !bytes.Equal(hash[0:], []byte(qsocket.CERT_FINGERPRINT)) {
-				return nil, ErrUntrustedCert
-			}
-		}
-
-	}
-
-	return conn, nil
 }
 
 func GetPeerTag(opts *config.Options) byte {
