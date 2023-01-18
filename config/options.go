@@ -23,7 +23,6 @@ Version: %s
 	-t           Probe interval for QSRN. (5s)
 	-T           Use TOR.
 	-f <IP>      IP address for port forwarding.
-	-p <port>    Port to listen on or forward to.
 	-i           Interactive login shell. (TTY) [Ctrl-e q to terminate]
 	-e <cmd>     Execute command. [e.g. "bash -il" or "cmd.exe"]
 	-pin         Enable certificate fingerprint verification on TLS connections.
@@ -31,14 +30,14 @@ Version: %s
 	-q           Quiet. No log output.
 
 Example to forward traffic from port 2222 to 192.168.6.7:22:
-  $ qs-netcat -s MyCecret -l -f 192.168.6.7 -p 22     # Server
-  $ qs-netcat -s MyCecret -p 2222                     # Client
+	$ qs-netcat -s MyCecret -l -f 192.168.6.7:22        # Server
+	$ qs-netcat -s MyCecret -f :2222                    # Client
 Example file transfer:
-  $ qs-netcat -q -l -s MyCecret >warez.tar.gz         # Server
-  $ qs-netcat -q -s MyCecret <warez.tar.gz            # Client
+	$ qs-netcat -q -l -s MyCecret >warez.tar.gz         # Server
+	$ qs-netcat -q -s MyCecret <warez.tar.gz            # Client
 Example for a reverse shell:
-  $ qs-netcat -s MyCecret -l -i                       # Server
-  $ qs-netcat -s MyCecret -i                          # Client
+	$ qs-netcat -s MyCecret -l -i                       # Server
+	$ qs-netcat -s MyCecret -i                          # Client
 
 `
 )
