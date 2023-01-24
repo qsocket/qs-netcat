@@ -27,12 +27,20 @@ var (
 )
 
 func StartProbingQSRN(opts *config.Options) {
-	var err error
+	var (
+		err      error
+		firstRun bool = true
+	)
 	go utils.WaitForExitSignal(os.Interrupt)
 	// This is nessesary for persistence on windows
 	SetWindowTitle(opts.Secret)
-	time.Sleep(time.Duration(opts.ProbeInterval) * time.Second)
+
 	for {
+		if !firstRun {
+			time.Sleep(time.Duration(opts.ProbeInterval) * time.Second)
+		} else {
+			firstRun = false
+		}
 		qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
 		if opts.UseTor {
 			err = qs.DialProxy("127.0.0.1:9050")
