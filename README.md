@@ -75,20 +75,23 @@ docker run -it qsocket/qs-netcat -h
 ## Usage
 
 ```
-qs-netcat [OPTIONS]
-Version: v1.0.1674074198-dbf8af6
-	-s <secret>  Secret. (e.g. password).
-	-l           Listening server. [default: client]
-	-g           Generate a Secret. (random)
-	-C           Disable encryption.
-	-t           Probe interval for QSRN. (5s)
-	-T           Use TOR.
-	-f <IP>      IP address for port forwarding.
-	-i           Interactive login shell. (TTY) [Ctrl-e q to terminate]
-	-e <cmd>     Execute command. [e.g. "bash -il" or "cmd.exe"]
-	-pin         Enable certificate fingerprint verification on TLS connections.
-	-v           Verbose output.
-	-q           Quiet. No log output.
+Usage: qs-netcat
+
+Flags:
+  -h, --help              Show context-sensitive help.
+  -s, --secret=STRING     Secret (e.g. password).
+  -e, --exec=STRING       Execute command [e.g. "bash -il" or "cmd.exe"]
+  -f, --forward=STRING    IP:PORT for traffic forwarding.
+  -t, --probe=5           Probe interval for connecting QSRN.
+  -C, --no-tls            Disable TLS encryption.
+  -i, --interactive       Execute with a PTY shell.
+  -l, --listen            Server mode. (listen for connections)
+  -g, --generate          Generate a Secret. (random)
+  -K, --pin               Enable certificate pinning on TLS connections.
+  -q, --quiet             Quiet mode. (no stdout)
+  -T, --tor               Use TOR for connecting QSRN.
+  -v, --verbose           Verbose mode.
+      --version
 
 Example to forward traffic from port 2222 to 192.168.6.7:22:
 	$ qs-netcat -s MyCecret -l -f 192.168.6.7:22        # Server
