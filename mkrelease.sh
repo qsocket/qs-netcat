@@ -66,12 +66,14 @@ one_must_exist() {
 
 ## Handle SININT
 exit_on_signal_SIGINT () {
+  echo ""
 	print_error "Script interrupted!"
-  	clean_exit
+  clean_exit
 }
 
 exit_on_signal_SIGTERM () {
-	print_error "Script interrupted!"
+	echo ""
+  print_error "Script interrupted!"
 	clean_exit
 }
 
