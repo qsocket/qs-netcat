@@ -1,34 +1,20 @@
 package config
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	Version  = "?"
-	usageStr = `
-qs-netcat [OPTIONS]
-Version: %s
-	-s <secret>  Secret. (e.g. password).
-	-l           Listening server. [default: client]
-	-g           Generate a Secret. (random)
-	-C           Disable encryption.
-	-t           Probe interval for QSRN. (5s)
-	-T           Use TOR.
-	-f <IP>      IP address for port forwarding.
-	-i           Interactive login shell. (TTY) [Ctrl-e q to terminate]
-	-e <cmd>     Execute command. [e.g. "bash -il" or "cmd.exe"]
-	-pin         Enable certificate fingerprint verification on TLS connections.
-	-v           Verbose output.
-	-q           Quiet. No log output.
+var Version = "?"
 
+const (
+	UsageExamples = `
 Example to forward traffic from port 2222 to 192.168.6.7:22:
 	$ qs-netcat -s MyCecret -l -f 192.168.6.7:22        # Server
 	$ qs-netcat -s MyCecret -f :2222                    # Client
@@ -38,80 +24,68 @@ Example file transfer:
 Example for a reverse shell:
 	$ qs-netcat -s MyCecret -l -i                       # Server
 	$ qs-netcat -s MyCecret -i                          # Client
-
 `
 )
 
-// PrintUsageErrorAndDie ...
-func PrintUsageErrorAndDie(err error) {
-	color.Red("\n%s", err.Error())
-	fmt.Printf(usageStr, Version)
-	os.Exit(1)
-}
-
-// PrintHelpAndDie ...
-func PrintHelpAndDie() {
-	fmt.Printf(usageStr, Version)
-	os.Exit(0)
-}
-
 // Main config struct for parsing the TOML file
 type Options struct {
-	UUID          string
-	Secret        string
-	Execute       string
-	ForwardAddr   string
-	Port          int
-	ProbeInterval int
-	DisableTLS    bool
-	Interactive   bool
-	Listen        bool
-	RandomSecret  bool
-	CertPinning   bool
-	Quiet         bool
-	UseTor        bool
-	Verbose       bool
-	help          bool
+	UUID          string `help:"UUID form of the qsocket secret." name:"uuid" hidden:""`
+	Secret        string `help:"Secret (e.g. password)." name:"secret" short:"s"`
+	Execute       string `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
+	ForwardAddr   string `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
+	ProbeInterval int    `help:"Probe interval for connecting QSRN." name:"probe" short:"t" default:"5"`
+	DisableTLS    bool   `help:"Disable TLS encryption." name:"no-tls" short:"C"`
+	Interactive   bool   `help:"Execute with a PTY shell." name:"interactive" short:"i"`
+	Listen        bool   `help:"Server mode. (listen for connections)" name:"listen" short:"l"`
+	RandomSecret  bool   `help:"Generate a Secret. (random)" name:"generate" short:"g"`
+	CertPinning   bool   `help:"Enable certificate pinning on TLS connections." name:"pin" short:"K"`
+	Quiet         bool   `help:"Quiet mode. (no stdout)" name:"quiet" short:"q"`
+	UseTor        bool   `help:"Use TOR for connecting QSRN." name:"tor" short:"T"`
+	Verbose       bool   `help:"Verbose mode." name:"verbose" short:"v"`
+	Version       kong.VersionFlag
+}
+
+func HelpPrompt(options kong.HelpOptions, ctx *kong.Context) error {
+	err := kong.DefaultHelpPrinter(options, ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = ctx.Stdout.Write([]byte(UsageExamples))
+	return err
 }
 
 // ConfigureOptions accepts a flag set and augments it with agentgo-server
 // specific flags. On success, an options structure is returned configured
 // based on the selected flags.
-func ConfigureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
-	// Create empty options
-	opts := &Options{}
-
-	// Define flags
-
-	fs.BoolVar(&opts.help, "h", false, "Prompt help")
-	fs.BoolVar(&opts.help, "help", false, "Prompt help")
-	fs.StringVar(&opts.UUID, "uuid", "", "UUID form of the qsocket secret.")
-	fs.StringVar(&opts.Secret, "s", "", "Secret (e.g. password)")
-	fs.StringVar(&opts.Execute, "e", "", "Execute command [e.g. \"bash -il\" or \"cmd.exe\"]")
-	fs.StringVar(&opts.ForwardAddr, "f", "", "IP:PORT for traffic forwarding")
-	fs.BoolVar(&opts.Listen, "l", false, "Listening server [default: client]")
-	fs.BoolVar(&opts.RandomSecret, "g", false, "Generate a Secret (random)")
-	fs.BoolVar(&opts.Interactive, "i", false, "Interactive login shell (TTY) [Ctrl-e q to terminate]")
-	fs.IntVar(&opts.ProbeInterval, "t", 5, "Probe interval for QSRN")
-	fs.BoolVar(&opts.DisableTLS, "C", false, "Disable encryption")
-	fs.BoolVar(&opts.UseTor, "T", false, "Use TOR")
-	fs.BoolVar(&opts.CertPinning, "pin", false, "Enable certificate pinning on TLS connections")
-	fs.BoolVar(&opts.Quiet, "q", false, "Quiet. No log outpu")
-	fs.BoolVar(&opts.Verbose, "v", false, "Verbose mode")
+func ConfigureOptions() (*Options, error) {
 
 	// If QS_ARGS exists overwrite the given arguments.
 	qsArgs := os.Getenv("QS_ARGS")
+	args := os.Args[1:]
 	if qsArgs != "" {
 		args = strings.Split(qsArgs, " ")
 	}
 
 	// Parse arguments and check for errors
-	if err := fs.Parse(args); err != nil {
+	opts := &Options{}
+
+	parser, err := kong.New(
+		opts,
+		kong.Help(HelpPrompt),
+		kong.UsageOnError(),
+		kong.Vars{"version": Version},
+		kong.ConfigureHelp(kong.HelpOptions{
+			Summary: true,
+		}),
+	)
+	if err != nil {
 		return nil, err
 	}
 
-	if opts.help {
-		PrintHelpAndDie()
+	_, err = parser.Parse(args)
+	if err != nil {
+		return nil, err
 	}
 
 	if !opts.RandomSecret && (opts.Secret == "" && opts.UUID == "") {
@@ -160,10 +134,6 @@ func (opts *Options) Summarize() {
 	if opts.ForwardAddr != "" {
 		yellow.Print("├──>")
 		fmt.Printf(" Forward: %s\n", opts.ForwardAddr)
-	}
-	if opts.Port != 0 {
-		yellow.Print("├──>")
-		fmt.Printf(" Port: %d\n", opts.Port)
 	}
 	yellow.Print("└──>")
 	if opts.Listen {

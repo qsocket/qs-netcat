@@ -103,7 +103,6 @@ func CreateOnConnectPipe(qs *qsocket.Qsocket, addr string) error {
 		ch <- true
 	}()
 	<-ch
-
 	return err
 }
 
@@ -112,7 +111,6 @@ func ServeToLocal(opts *config.Options) {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -142,13 +140,11 @@ func Connect(opts *config.Options) error {
 		ServeToLocal(opts)
 		return nil
 	}
-
 	defer spn.Stop()
 	if !opts.Quiet {
 		spn.Suffix = " Dialing qsocket relay network..."
 		spn.Start()
 	}
-
 	var err error
 	qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
 	if opts.UseTor {
@@ -159,7 +155,6 @@ func Connect(opts *config.Options) error {
 	if err != nil {
 		return err
 	}
-
 	return AttachToSocket(qs, opts.Interactive)
 }
 
@@ -173,7 +168,6 @@ func AttachToSocket(conn *qsocket.Qsocket, interactive bool) error {
 		}
 		defer term.Restore(int(os.Stdin.Fd()), oldState)
 	}
-
 	spn.Stop()
 	go func() { io.Copy(conn, os.Stdin) }()
 	io.Copy(os.Stdout, conn)
@@ -185,11 +179,8 @@ func GetPeerTag(opts *config.Options) byte {
 	if opts.Listen {
 		tag = qsocket.TAG_PEER_SRV
 	}
-
-	if opts.Port != 0 ||
-		opts.ForwardAddr != "" {
+	if opts.ForwardAddr != "" {
 		return qsocket.TAG_PEER_PROXY
 	}
-
 	return tag
 }
