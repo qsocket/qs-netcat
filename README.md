@@ -134,3 +134,10 @@ https://user-images.githubusercontent.com/1161307/171013513-95f18734-233d-45d3-a
 https://user-images.githubusercontent.com/17179401/213314447-65ecaf43-89fd-48bd-a242-3345f6baf185.mov
 
 </details>
+
+<details>
+<summary>ADB access over QSRN</summary>
+
+https://user-images.githubusercontent.com/17179401/216651601-6ddc8ddf-7248-4c2b-bd77-00f00f773c80.mov
+
+</details>
