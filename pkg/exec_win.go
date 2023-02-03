@@ -25,7 +25,7 @@ func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	if err != nil {
 		return err
 	}
-	os.Setenv("qs-netcat", ncDir)
+	os.Setenv("qs_netcat", ncDir)
 	cmd := exec.Command(params[0])
 	if len(params) > 1 {
 		cmd = exec.Command(params[0], params[1:]...)
