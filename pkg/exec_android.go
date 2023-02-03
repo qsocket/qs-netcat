@@ -26,7 +26,6 @@ func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	if err != nil {
 		return err
 	}
-
 	os.Setenv("qs_netcat", ncDir)
 	os.Setenv("HISTFILE", "/dev/null")
 	cmd := exec.Command(params[0])

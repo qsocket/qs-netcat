@@ -34,6 +34,7 @@ func StartProbingQSRN(opts *config.Options) {
 	go utils.WaitForExitSignal(os.Interrupt)
 	// This is nessesary for persistence on windows
 	SetWindowTitle(opts.Secret)
+	os.Unsetenv("QS_ARGS") // Remove this for allowing recursive qs-netcat usage
 
 	for {
 		if !firstRun {
