@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -23,10 +22,11 @@ const SHELL = "sh"
 func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
 	defer conn.Close()
 	params := strings.Split(comm, " ")
-	ncDir, err := filepath.Abs(os.Args[0])
+	ncDir, err := os.Executable()
 	if err != nil {
 		return err
 	}
+
 	os.Setenv("qs_netcat", ncDir)
 	os.Setenv("HISTFILE", "/dev/null")
 	cmd := exec.Command(params[0])
