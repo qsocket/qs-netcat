@@ -184,6 +184,7 @@ package_release_binary "aix" "ppc64" && print_ok || print_fail
 print_good "All done!"
 
 cd $RELEASE_DIR
+echo "Early alpha builds for testing."
 echo -e "\n\`\`\`"
 sha1sum *
 echo -e "\`\`\`\n"
