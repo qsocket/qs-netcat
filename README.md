@@ -82,7 +82,7 @@ Flags:
   -s, --secret=STRING     Secret (e.g. password).
   -e, --exec=STRING       Execute command [e.g. "bash -il" or "cmd.exe"]
   -f, --forward=STRING    IP:PORT for traffic forwarding.
-  -t, --probe=5           Probe interval for connecting QSRN.
+  -n, --probe=5           Probe interval for connecting QSRN.
   -C, --no-tls            Disable TLS encryption.
   -i, --interactive       Execute with a PTY shell.
   -l, --listen            Server mode. (listen for connections)
@@ -121,12 +121,8 @@ $ qs-netcat -q -s MySecret -l > file.txt     # Workstation A
 $ qs-netcat -q -s MySecret < file.txt        # Workstation B
 ```
 
-<details>
-<summary>SSH connection over QSRN</summary>
-
 https://user-images.githubusercontent.com/1161307/171013513-95f18734-233d-45d3-aaf5-d6aec687db0e.mov
 
-</details>
 
 <details>
 <summary>RDP connection over QSRN</summary>

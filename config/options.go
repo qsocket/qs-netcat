@@ -33,7 +33,7 @@ type Options struct {
 	Secret        string `help:"Secret (e.g. password)." name:"secret" short:"s"`
 	Execute       string `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
 	ForwardAddr   string `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
-	ProbeInterval int    `help:"Probe interval for connecting QSRN." name:"probe" short:"t" default:"5"`
+	ProbeInterval int    `help:"Probe interval for connecting QSRN." name:"probe" short:"n" default:"5"`
 	DisableTLS    bool   `help:"Disable TLS encryption." name:"no-tls" short:"C"`
 	Interactive   bool   `help:"Execute with a PTY shell." name:"interactive" short:"i"`
 	Listen        bool   `help:"Server mode. (listen for connections)" name:"listen" short:"l"`
