@@ -18,7 +18,7 @@ import (
 
 const SHELL = "/bin/bash -il"
 
-func ExecCommand(comm string, conn *qsocket.Qsocket, interactive bool) error {
+func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 	defer conn.Close()
 	params := strings.Split(comm, " ")
 	ncDir, err := os.Executable()

@@ -42,7 +42,8 @@ func StartProbingQSRN(opts *config.Options) {
 		} else {
 			firstRun = false
 		}
-		qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
+		qs := qsocket.NewSocket(opts.Secret)
+		qs.AddIdTag(GetPeerTag(opts))
 		if opts.UseTor {
 			err = qs.DialProxy("127.0.0.1:9050")
 		} else {
@@ -86,7 +87,7 @@ func SetWindowTitle(title string) {
 	}
 }
 
-func CreateOnConnectPipe(qs *qsocket.Qsocket, addr string) error {
+func CreateOnConnectPipe(qs *qsocket.QSocket, addr string) error {
 	defer qs.Close()
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -118,7 +119,8 @@ func ServeToLocal(opts *config.Options) {
 			logrus.Error(err)
 			continue
 		}
-		qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
+		qs := qsocket.NewSocket(opts.Secret)
+		qs.AddIdTag(GetPeerTag(opts))
 		err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
 		if err != nil {
 			logrus.Error(err)
@@ -147,7 +149,8 @@ func Connect(opts *config.Options) error {
 		spn.Start()
 	}
 	var err error
-	qs := qsocket.NewSocket(opts.Secret, GetPeerTag(opts))
+	qs := qsocket.NewSocket(opts.Secret)
+	qs.AddIdTag(GetPeerTag(opts))
 	if opts.UseTor {
 		err = qs.DialProxy("socks5://127.0.0.1:9050")
 	} else {
@@ -159,7 +162,7 @@ func Connect(opts *config.Options) error {
 	return AttachToSocket(qs, opts.Interactive)
 }
 
-func AttachToSocket(conn *qsocket.Qsocket, interactive bool) error {
+func AttachToSocket(conn *qsocket.QSocket, interactive bool) error {
 	defer conn.Close()
 	if interactive {
 		spn.Suffix = " Setting up TTY terminal..."
