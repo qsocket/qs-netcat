@@ -29,7 +29,7 @@
 [qsrn]: https://github.com/qsocket/qsrn
 
 qs-netcat is a cross-platform networking utility which reads and writes data across systems using the [QSRN](qsrn).
-It allows redirecting true PTY sessions with reverse connections, effectively backdooring systems, creating TCP proxies, and transferring files to and from systems under NAT networks.
+It allows redirecting true PTY sessions with reverse connections, effectively allowing remote access to systems, creating TCP proxies, and transferring files to and from systems under NAT networks or firewalls.
 
 ## Installation
 
@@ -41,7 +41,7 @@ It allows redirecting true PTY sessions with reverse connections, effectively ba
 
 ---
 
-qs-netcat supports 10 architectures and 12 operating systems, check **Supported Platforms** below for detailed table. 
+qs-netcat supports 10 architectures and 12 operating systems, following table contains detailed list of all **Supported Platforms**. 
 <details>
 <summary>Supported Platforms</summary>
 
@@ -124,12 +124,14 @@ $ qs-netcat -q -s MySecret < file.txt        # Workstation B
 https://user-images.githubusercontent.com/1161307/171013513-95f18734-233d-45d3-aaf5-d6aec687db0e.mov
 
 
+
 <details>
 <summary>RDP connection over QSRN</summary>
 
 https://user-images.githubusercontent.com/17179401/213314447-65ecaf43-89fd-48bd-a242-3345f6baf185.mov
 
 </details>
+
 
 <details>
 <summary>ADB access over QSRN</summary>
