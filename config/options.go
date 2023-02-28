@@ -8,6 +8,7 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
+	"github.com/qsocket/qs-netcat/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -88,6 +89,12 @@ func ConfigureOptions() (*Options, error) {
 		return nil, err
 	}
 
+	// Generate random secret
+	if !opts.Listen && opts.RandomSecret {
+		print(utils.RandomString(20))
+		os.Exit(0)
+	}
+
 	if !opts.RandomSecret && (opts.Secret == "" && opts.UUID == "") {
 		color.New(color.FgBlue).Add(color.Bold).Print("[>] ")
 		print("Enter Secret (or press Enter to generate): ")
@@ -95,7 +102,6 @@ func ConfigureOptions() (*Options, error) {
 		if n == 0 {
 			opts.RandomSecret = true
 		}
-		// print("\n==============================================\n")
 	}
 
 	if opts.Verbose {

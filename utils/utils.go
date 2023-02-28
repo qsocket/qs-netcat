@@ -27,7 +27,6 @@ func CaclChecksum(data []byte, base uint) uint {
 	for _, n := range data {
 		checksum += uint(n)
 	}
-
 	return checksum % base
 }
 
