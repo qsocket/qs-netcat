@@ -20,9 +20,9 @@ import (
 )
 
 var (
-	ErrQsocketSessionEnd = errors.New("Qsocket session has ended")
+	ErrQsocketSessionEnd = errors.New("qsocket session has ended")
 	ErrTtyFailed         = errors.New("TTY initialization failed")
-	ErrUntrustedCert     = errors.New("Certificate fingerprint mismatch")
+	ErrUntrustedCert     = errors.New("certificate fingerprint mismatch")
 	spn                  = spinner.New(spinner.CharSets[9], 50*time.Millisecond)
 )
 
@@ -42,12 +42,16 @@ func StartProbingQSRN(opts *config.Options) {
 		} else {
 			firstRun = false
 		}
-		qs := qsocket.NewSocket(opts.Secret)
+		qs := qsocket.NewSocket(opts.Secret, opts.CertPinning)
 		qs.AddIdTag(GetPeerTag(opts))
 		if opts.UseTor {
 			err = qs.DialProxy("127.0.0.1:9050")
 		} else {
-			err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
+			if opts.DisableTLS {
+				err = qs.DialTCP()
+			} else {
+				err = qs.Dial()
+			}
 		}
 		if err != nil {
 			if err != qsocket.ErrConnRefused {
@@ -119,9 +123,13 @@ func ServeToLocal(opts *config.Options) {
 			logrus.Error(err)
 			continue
 		}
-		qs := qsocket.NewSocket(opts.Secret)
+		qs := qsocket.NewSocket(opts.Secret, opts.CertPinning)
 		qs.AddIdTag(GetPeerTag(opts))
-		err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
+		if opts.DisableTLS {
+			err = qs.DialTCP()
+		} else {
+			err = qs.Dial()
+		}
 		if err != nil {
 			logrus.Error(err)
 			continue
@@ -149,12 +157,16 @@ func Connect(opts *config.Options) error {
 		spn.Start()
 	}
 	var err error
-	qs := qsocket.NewSocket(opts.Secret)
+	qs := qsocket.NewSocket(opts.Secret, opts.CertPinning)
 	qs.AddIdTag(GetPeerTag(opts))
 	if opts.UseTor {
 		err = qs.DialProxy("socks5://127.0.0.1:9050")
 	} else {
-		err = qs.Dial(!opts.DisableTLS, opts.CertPinning)
+		if opts.DisableTLS {
+			err = qs.DialTCP()
+		} else {
+			err = qs.Dial()
+		}
 	}
 	if err != nil {
 		return err

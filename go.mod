@@ -8,7 +8,7 @@ require (
 	github.com/briandowns/spinner v1.19.0
 	github.com/creack/pty v1.1.18
 	github.com/fatih/color v1.13.0
-	github.com/qsocket/qsocket-go v0.0.0-20230208155751-6f354d3f9013
+	github.com/qsocket/qsocket-go v0.0.0-20230301113726-57e252bb8881
 	github.com/sirupsen/logrus v1.9.0
 	golang.org/x/term v0.5.0
 )

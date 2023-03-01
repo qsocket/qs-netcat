@@ -29,8 +29,8 @@ github.com/mattn/go-isatty v0.0.16 h1:bq3VjFmv/sOjHtdEhmkEV4x1AJtvUvOJ2PFAZ5+peK
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/qsocket/qsocket-go v0.0.0-20230208155751-6f354d3f9013 h1:erwdt93R8+Dz2DCe7dNSGad2rCDJf/TT1V0MDZPmNq4=
-github.com/qsocket/qsocket-go v0.0.0-20230208155751-6f354d3f9013/go.mod h1:7zVsaSup2ansjsWGOewASHQmo0sbOFqelcgTqladXLI=
+github.com/qsocket/qsocket-go v0.0.0-20230301113726-57e252bb8881 h1:vCJSnUxBf+xlZ0qYhoLTi3HTfp0Bx6IG413g9NJtIVA=
+github.com/qsocket/qsocket-go v0.0.0-20230301113726-57e252bb8881/go.mod h1:P7AY4FUVJ/P9nTp7PxRuneCQGw91JA5Mcx3HrqBv9mQ=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
