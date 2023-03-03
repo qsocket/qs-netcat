@@ -129,19 +129,19 @@ func (opts *Options) Summarize() {
 	}
 
 	byellow.Printf("[#] %s\n", blue.Sprintf(".::Qsocket Netcat::."))
-	yellow.Print("├──>")
+	yellow.Print(" ├──>")
 	fmt.Printf(" Secret: %s\n", red.Sprintf(opts.Secret))
-	yellow.Print("├──>")
+	yellow.Print(" ├──>")
 	fmt.Printf(" Mode: %s\n", mode)
-	yellow.Print("├──>")
+	yellow.Print(" ├──>")
 	fmt.Printf(" TLS: %t\n", !opts.DisableTLS)
-	yellow.Print("├──>")
+	yellow.Print(" ├──>")
 	fmt.Printf(" TOR: %t\n", opts.UseTor)
 	if opts.ForwardAddr != "" {
-		yellow.Print("├──>")
+		yellow.Print(" ├──>")
 		fmt.Printf(" Forward: %s\n", opts.ForwardAddr)
 	}
-	yellow.Print("└──>")
+	yellow.Print(" └──>")
 	if opts.Listen {
 		fmt.Printf(" Probe Interval: %s\n", time.Second*time.Duration(opts.ProbeInterval))
 	} else {
