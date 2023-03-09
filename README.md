@@ -121,7 +121,7 @@ $ qs-netcat -q -s MySecret -l > file.txt     # Workstation A
 $ qs-netcat -q -s MySecret < file.txt        # Workstation B
 ```
 
-https://user-images.githubusercontent.com/17179401/221196823-5c6e3a66-3b06-410a-9d2b-33efd101428a.mp4
+https://user-images.githubusercontent.com/17179401/224060762-e0f121f6-431b-4eb5-8833-4a5d533003de.mp4
 
 ---
 
