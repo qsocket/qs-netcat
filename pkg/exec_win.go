@@ -13,7 +13,7 @@ import (
 	"syscall"
 
 	conpty "github.com/EgeBalci/conpty-go"
-	qsocket "github.com/qsocket/qsocket-go"
+	qsocket "github.com/qsocket/qs-netcat/qsocket-go"
 )
 
 func init() {

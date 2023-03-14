@@ -15,7 +15,7 @@ import (
 var Version = "?"
 
 const (
-	UsageExamples = `
+	USAGE_EAMPLES = `
 Example to forward traffic from port 2222 to 192.168.6.7:22:
 	$ qs-netcat -s MyCecret -l -f 192.168.6.7:22        # Server
 	$ qs-netcat -s MyCecret -f :2222                    # Client
@@ -51,7 +51,7 @@ func HelpPrompt(options kong.HelpOptions, ctx *kong.Context) error {
 	if err != nil {
 		return err
 	}
-	print(UsageExamples)
+	print(USAGE_EAMPLES)
 	return nil
 }
 
