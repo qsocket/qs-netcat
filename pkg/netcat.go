@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/qsocket/qs-netcat/config"
-	qsocket "github.com/qsocket/qs-netcat/qsocket-go"
 	"github.com/qsocket/qs-netcat/utils"
+	qsocket "github.com/qsocket/qsocket-go"
 
 	"github.com/briandowns/spinner"
 	"github.com/sirupsen/logrus"

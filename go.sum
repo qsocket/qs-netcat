@@ -1,7 +1,3 @@
-github.com/EgeBalci/conpty-go v0.0.0-20221202214232-be2a46483c6a h1:YaBW208K1v5y06HtAP+6aoa1mVLyFWUSXANbH4CUeiI=
-github.com/EgeBalci/conpty-go v0.0.0-20221202214232-be2a46483c6a/go.mod h1:vljOQhcvUI6oGU6XxKWVCpirnEmHsCEy463YFXG+M4U=
-github.com/EgeBalci/encrypted-stream v0.0.0-20230301092851-c0345e669e6c h1:78QSN4pMH63GiluuVXWGpulBQQWsh4yL8yc3+84xjYw=
-github.com/EgeBalci/encrypted-stream v0.0.0-20230301092851-c0345e669e6c/go.mod h1:QsGht4+QtJgDSLc22jF7VbDxyRqH1ur40Ab46GksBkI=
 github.com/alecthomas/assert/v2 v2.1.0 h1:tbredtNcQnoSd3QBhQWI7QZ3XHOVkw1Moklp2ojoH/0=
 github.com/alecthomas/kong v0.7.1 h1:azoTh0IOfwlAX3qN9sHWTxACE2oV8Bg2gAwBsMwDQY4=
 github.com/alecthomas/kong v0.7.1/go.mod h1:n1iCIO2xS46oE8ZfYCNDqdR0b0wZNrXAIAqro/2132U=
@@ -30,6 +26,14 @@ github.com/mattn/go-isatty v0.0.17 h1:BTarxUcIeDqL27Mc+vyvdWYSL28zpIhv3RoTdsLMPn
 github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/qsocket/conpty-go v0.0.0-20230315180542-d8f8596877dc h1:XSfMXQ75WkkiCA7lBOBaq2dr0+9+KaqmM/QvGfLIzx0=
+github.com/qsocket/conpty-go v0.0.0-20230315180542-d8f8596877dc/go.mod h1:CjcNvNYhzkvf4UhGSgsUXgUzh+j/gyXNeTto6Coz0Gc=
+github.com/qsocket/encrypted-stream v0.0.0-20230315174242-281d81a13266 h1:rVp07UeEx0cnmGCHpudq2sHFNTSjskf3rIE3KGX+8YE=
+github.com/qsocket/encrypted-stream v0.0.0-20230315174242-281d81a13266/go.mod h1:r9kJiti9iVRLoRKwLEuqdxksm38Ek5xRU8mR9+PEB6A=
+github.com/qsocket/go-srp v0.0.0-20230315175014-fb16dd9247df h1:PbAZ0Eb2pfUZ/tyNpLq45aYb28VH59EIRKE1zBQRu0g=
+github.com/qsocket/go-srp v0.0.0-20230315175014-fb16dd9247df/go.mod h1:qTi2TUfUFeM6K/d2DGDuI4s2eL+cvHGKOsHvIqxXujY=
+github.com/qsocket/qsocket-go v0.0.1-beta.0.20230315175430-58eaf2aebb0d h1:KO1gsxU2YVUiH0jrpTZL6ahEy6LP8Q8ILjCDlXM+H00=
+github.com/qsocket/qsocket-go v0.0.1-beta.0.20230315175430-58eaf2aebb0d/go.mod h1:YrJjszuKr5yigsxPEW9OmXNQqHSdrPURpLMSShjKC08=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
