@@ -26,7 +26,7 @@ Example for a reverse shell:
 	$ qs-netcat -s MyCecret -l -i                       # Server
 	$ qs-netcat -s MyCecret -i                          # Client
 `
-	DEFAULT_E2E_CIPHER = "AES-GCM-SHA-256-E2E"
+	DEFAULT_E2E_CIPHER = "SRP-AES-GCM-256-E2E (Prime: 4096)"
 )
 
 // Main config struct for parsing the TOML file

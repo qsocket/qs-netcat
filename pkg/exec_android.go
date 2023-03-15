@@ -12,7 +12,7 @@ import (
 	"syscall"
 
 	"github.com/creack/pty"
-	qsocket "github.com/qsocket/qs-netcat/qsocket-go"
+	qsocket "github.com/qsocket/qsocket-go"
 	"github.com/sirupsen/logrus"
 	// _ "golang.org/x/mobile/app"
 )
