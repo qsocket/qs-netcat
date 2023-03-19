@@ -28,7 +28,7 @@
 [workflow]: https://github.com/qsocket/qs-netcat/actions/workflows/main.yml
 [qsrn]: https://www.qsocket.io/qsrn/
 
-qs-netcat is a cross-platform networking utility which reads and writes data across systems using the [QSRN][qsrn].
+qs-netcat is a E2E encrypted, cross-platform networking utility which reads and writes data across systems using the [QSRN][qsrn].
 It allows redirecting true PTY sessions with reverse connections, effectively allowing remote access to systems, forwarding traffic, and transferring files to and from systems under NAT networks or firewalls.
 
 ## Installation
