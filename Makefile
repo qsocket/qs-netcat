@@ -36,7 +36,7 @@ openbsd:
 	GOOS=openbsd GOARCH=386 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/openbsd/qs-netcat-386
 	GOOS=openbsd GOARCH=arm ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/openbsd/qs-netcat-arm
 	GOOS=openbsd GOARCH=arm64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/openbsd/qs-netcat-arm64
-	GOOS=openbsd GOARCH=mips64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/openbsd/qs-netcat-mips64
+# 	GOOS=openbsd GOARCH=mips64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/openbsd/qs-netcat-mips64
 netbsd:
 	GOOS=netbsd GOARCH=amd64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/netbsd/qs-netcat-amd64
 	GOOS=netbsd GOARCH=386 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/netbsd/qs-netcat-386

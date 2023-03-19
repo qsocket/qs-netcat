@@ -13,7 +13,13 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.18
+        go-version: 1.19
     - name: Install dependencies
       run: make all
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: qs-netcat_all_builds
+        path: ./build/*
+        retention-days: 5
 
