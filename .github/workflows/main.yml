@@ -6,7 +6,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  build-all:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -14,7 +14,7 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
-    - name: Install dependencies
+    - name: Make All Targets
       run: make all
     - name: 'Upload Artifact'
       uses: actions/upload-artifact@v3
@@ -22,4 +22,39 @@ jobs:
         name: qs-netcat_all_builds
         path: ./build/*
         retention-days: 5
-
+  macos-run:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+    - name: Make Build
+      run: make
+    - name: Test Run
+      run: ./build/qs-netcat -g
+  linux-run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+    - name: Make Build
+      run: make
+    - name: Test Run
+      run: ./build/qs-netcat -g
+  windows-run:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+    - name: Make Build
+      run: make
+    - name: Test Run
+      run: ./build/qs-netcat.exe -g

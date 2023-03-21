@@ -8,7 +8,7 @@ ANDROID_BUILD=CGO_ENABLED=1 go build -trimpath -buildvcs=false -ldflags="-s -w -
 $(shell mkdir -p build/{windows,linux,darwin,android,ios,freebsd,openbsd,solaris,aix,illumos,dragonfly})
 
 default:
-	${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/qs-netcat
+	${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/
 windows:
 	GOOS=windows GOARCH=amd64 ${BUILD} ${WIN_BUILD_FLAGS}  -o ${OUT_DIR}/windows/qs-netcat-amd64.exe
 	GOOS=windows GOARCH=386 ${BUILD} ${WIN_BUILD_FLAGS} -o ${OUT_DIR}/windows/qs-netcat-386.exe
