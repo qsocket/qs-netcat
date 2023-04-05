@@ -42,7 +42,9 @@ func StartProbingQSRN(opts *config.Options) {
 		} else {
 			firstRun = false
 		}
-		qs := qsocket.NewSocket(opts.Secret, opts.CertPinning)
+		qs := qsocket.NewSocket(opts.Secret)
+		qs.SetCertPinning(opts.CertPinning)
+		qs.SetE2E(opts.End2End)
 		qs.AddIdTag(GetPeerTag(opts))
 		if opts.UseTor {
 			err = qs.DialProxy("127.0.0.1:9050")
@@ -123,7 +125,9 @@ func ServeToLocal(opts *config.Options) {
 			logrus.Error(err)
 			continue
 		}
-		qs := qsocket.NewSocket(opts.Secret, opts.CertPinning)
+		qs := qsocket.NewSocket(opts.Secret)
+		qs.SetCertPinning(opts.CertPinning)
+		qs.SetE2E(opts.End2End)
 		qs.AddIdTag(GetPeerTag(opts))
 		if opts.DisableEnc {
 			err = qs.DialTCP()
@@ -157,7 +161,9 @@ func Connect(opts *config.Options) error {
 		spn.Start()
 	}
 	var err error
-	qs := qsocket.NewSocket(opts.Secret, opts.CertPinning)
+	qs := qsocket.NewSocket(opts.Secret)
+	qs.SetCertPinning(opts.CertPinning)
+	qs.SetE2E(opts.End2End)
 	qs.AddIdTag(GetPeerTag(opts))
 	if opts.UseTor {
 		err = qs.DialProxy("socks5://127.0.0.1:9050")

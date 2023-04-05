@@ -83,7 +83,8 @@ Flags:
   -e, --exec=STRING       Execute command [e.g. "bash -il" or "cmd.exe"]
   -f, --forward=STRING    IP:PORT for traffic forwarding.
   -n, --probe=5           Probe interval for connecting QSRN.
-  -C, --plain             Disable encryption.
+  -C, --plain             Disable all encryption.
+      --e2e               Use E2E encryption. (default:true)
   -i, --interactive       Execute with a PTY shell.
   -l, --listen            Server mode. (listen for connections)
   -g, --generate          Generate a Secret. (random)
@@ -102,7 +103,6 @@ Example file transfer:
 Example for a reverse shell:
 	$ qs-netcat -s MyCecret -l -i                       # Server
 	$ qs-netcat -s MyCecret -i                          # Client
-
 
 ```
 ### Examples
