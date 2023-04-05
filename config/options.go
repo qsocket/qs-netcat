@@ -35,7 +35,8 @@ type Options struct {
 	Execute       string `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
 	ForwardAddr   string `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
 	ProbeInterval int    `help:"Probe interval for connecting QSRN." name:"probe" short:"n" default:"5"`
-	DisableEnc    bool   `help:"Disable encryption." name:"plain" short:"C"`
+	DisableEnc    bool   `help:"Disable all encryption." name:"plain" short:"C"`
+	End2End       bool   `help:"Use E2E encryption. (default:true)" name:"e2e" default:"true"`
 	Interactive   bool   `help:"Execute with a PTY shell." name:"interactive" short:"i"`
 	Listen        bool   `help:"Server mode. (listen for connections)" name:"listen" short:"l"`
 	RandomSecret  bool   `help:"Generate a Secret. (random)" name:"generate" short:"g"`
@@ -146,7 +147,11 @@ func (opts *Options) Summarize() {
 	if opts.DisableEnc {
 		fmt.Printf(" Encryption: %s\n", red.Sprintf("DISABLED"))
 	} else {
-		fmt.Printf(" Encryption: %s\n", DEFAULT_E2E_CIPHER)
+		if opts.End2End {
+			fmt.Printf(" Encryption: %s\n", DEFAULT_E2E_CIPHER)
+		} else {
+			fmt.Println(" Encryption: TLS (v1.2)")
+		}
 	}
 
 	print("\n")
