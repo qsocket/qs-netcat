@@ -167,7 +167,7 @@ done
 
 # Special distro cases...
 print_progress "Packaging android APK"
-cp "$BUILD_DIR/android/qs-netcat.apk" "$RELEASE_DIR/" && print_ok || print_fail
+cp "$BUILD_DIR/android/qs-netcat.apk" "$RELEASE_DIR/" &>$ERR_LOG && print_ok || print_fail
 
 print_progress "Packaging solaris-amd64 binary"
 package_release_binary "netbsd" "amd64" && print_ok || print_fail
