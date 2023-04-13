@@ -5,8 +5,6 @@ import (
 	"io"
 	"net"
 	"os"
-	"os/exec"
-	"runtime"
 	"strings"
 	"time"
 
@@ -33,8 +31,7 @@ func StartProbingQSRN(opts *config.Options) {
 	)
 	go utils.WaitForExitSignal(os.Interrupt)
 	// This is nessesary for persistence on windows
-	SetWindowTitle(opts.Secret) // This is nessesary for checking if the beacon is already running or not in Windows.
-	os.Unsetenv("QS_ARGS")      // Remove this for allowing recursive qs-netcat usage
+	os.Unsetenv("QS_ARGS") // Remove this for allowing recursive qs-netcat usage
 
 	for {
 		if !firstRun {
@@ -96,12 +93,6 @@ func StartProbingQSRN(opts *config.Options) {
 			continue
 		}
 
-	}
-}
-
-func SetWindowTitle(title string) {
-	if runtime.GOOS == "windows" {
-		exec.Command("cmd.exe", "/C", "title", title).Run()
 	}
 }
 
