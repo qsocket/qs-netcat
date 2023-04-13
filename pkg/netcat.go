@@ -65,6 +65,9 @@ func StartProbingQSRN(opts *config.Options) {
 			}
 		}
 		if err != nil {
+			if err == qsocket.ErrAddressInUse {
+				logrus.Fatal(err)
+			}
 			if err != qsocket.ErrConnRefused {
 				logrus.Error(err)
 			}
