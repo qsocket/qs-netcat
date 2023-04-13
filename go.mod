@@ -20,8 +20,8 @@ require (
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/qsocket/encrypted-stream v0.0.0-20230315174242-281d81a13266 // indirect
 	github.com/qsocket/go-srp v0.0.0-20230315175014-fb16dd9247df // indirect
-	github.com/qsocket/qsocket-go v0.0.3-beta // indirect
-	golang.org/x/crypto v0.7.0 // indirect
+	github.com/qsocket/qsocket-go v0.0.4-beta // indirect
+	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 )
