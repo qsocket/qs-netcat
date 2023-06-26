@@ -225,7 +225,7 @@ func GetPeerTag(opts *config.Options) byte {
 		tag = qsocket.TAG_PEER_SRV
 	}
 	if opts.ForwardAddr != "" {
-		return qsocket.TAG_PEER_PROXY
+		tag |= qsocket.TAG_PEER_PROXY
 	}
 	return tag
 }
