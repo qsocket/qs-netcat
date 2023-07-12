@@ -1,15 +1,17 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
+	"github.com/qsocket/qs-netcat/log"
 	"github.com/qsocket/qs-netcat/utils"
-	"github.com/sirupsen/logrus"
 )
 
 var Version = "?"
@@ -29,11 +31,16 @@ Example for a reverse shell:
 	DEFAULT_E2E_CIPHER = "SRP-AES-GCM-256-E2E (Prime: 4096)"
 )
 
+var (
+	ForwardAddrRgx = regexp.MustCompile(`([0-9]{1,5}:|)(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}`)
+)
+
 // Main config struct for parsing the TOML file
 type Options struct {
 	Secret        string `help:"Secret (e.g. password)." name:"secret" short:"s"`
 	Execute       string `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
 	ForwardAddr   string `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
+	SocksAddr     string `help:"User socks proxy address for connecting QSRN." name:"socks" short:"x"`
 	ProbeInterval int    `help:"Probe interval for connecting QSRN." name:"probe" short:"n" default:"5"`
 	DisableEnc    bool   `help:"Disable all encryption." name:"plain" short:"C"`
 	End2End       bool   `help:"Use E2E encryption. (default:true)" name:"e2e" default:"true"`
@@ -93,6 +100,14 @@ func ConfigureOptions() (*Options, error) {
 		os.Exit(0)
 	}
 
+	if opts.ForwardAddr != "" && !ForwardAddrRgx.MatchString(opts.ForwardAddr) {
+		return nil, errors.New("invalid forward address")
+	}
+
+	if opts.UseTor {
+		opts.SocksAddr = "socks5://127.0.0.1:9050"
+	}
+
 	if !opts.RandomSecret && opts.Secret == "" {
 		color.New(color.FgBlue).Add(color.Bold).Print("[>] ")
 		print("Enter Secret (or press Enter to generate): ")
@@ -103,11 +118,11 @@ func ConfigureOptions() (*Options, error) {
 	}
 
 	if opts.Verbose {
-		logrus.SetLevel(logrus.TraceLevel) // Show all the shit!
+		log.SetLevel(log.LOG_LEVEL_TRACE) // Show all the shit!
 	}
 
 	if opts.Quiet {
-		logrus.SetLevel(logrus.FatalLevel) // Show nothing!
+		log.SetLevel(log.LOG_LEVEL_FATAL) // Show nothing!
 	}
 
 	return opts, nil

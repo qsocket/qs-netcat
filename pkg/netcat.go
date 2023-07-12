@@ -2,6 +2,7 @@ package qsnetcat
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"os"
@@ -9,11 +10,11 @@ import (
 	"time"
 
 	"github.com/qsocket/qs-netcat/config"
+	"github.com/qsocket/qs-netcat/log"
 	"github.com/qsocket/qs-netcat/utils"
 	qsocket "github.com/qsocket/qsocket-go"
 
 	"github.com/briandowns/spinner"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/term"
 )
 
@@ -42,18 +43,18 @@ func StartProbingQSRN(opts *config.Options) {
 		qs := qsocket.NewSocket(opts.Secret)
 		err = qs.SetE2E(opts.End2End)
 		if err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 		err = qs.SetCertPinning(opts.CertPinning)
 		if err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 		err = qs.AddIdTag(GetPeerTag(opts))
 		if err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
-		if opts.UseTor {
-			err = qs.DialProxy("127.0.0.1:9050")
+		if opts.SocksAddr != "" {
+			err = qs.DialProxy(opts.SocksAddr)
 		} else {
 			if opts.DisableEnc {
 				err = qs.DialTCP()
@@ -63,20 +64,20 @@ func StartProbingQSRN(opts *config.Options) {
 		}
 		if err != nil {
 			if err == qsocket.ErrAddressInUse {
-				logrus.Fatal(err)
+				log.Fatal(err)
 			}
 			if err != qsocket.ErrConnRefused {
-				logrus.Error(err)
+				log.Error(err)
 			}
 			continue
 		}
 
 		// First check if forwarding enabled
-		if opts.ForwardAddr != "" {
+		if qs.GetForwardAddr() != "" {
 			// Redirect traffic to forward addr
-			err = CreateOnConnectPipe(qs, opts.ForwardAddr)
+			err = CreateOnConnectPipe(qs, qs.GetForwardAddr())
 			if err != nil {
-				logrus.Error(err)
+				log.Error(err)
 			}
 			continue
 		}
@@ -89,7 +90,7 @@ func StartProbingQSRN(opts *config.Options) {
 		// Execute command/program and redirect stdin/out/err
 		err = ExecCommand(opts.Execute, qs, opts.Interactive)
 		if err != nil && !strings.Contains(err.Error(), "connection reset by peer") {
-			logrus.Error(err)
+			log.Error(err)
 			continue
 		}
 
@@ -117,46 +118,42 @@ func CreateOnConnectPipe(qs *qsocket.QSocket, addr string) error {
 	return err
 }
 
-func ServeToLocal(opts *config.Options) {
-	ln, err := net.Listen("tcp", opts.ForwardAddr)
+func ServeToLocal(qs *qsocket.QSocket, opts *config.Options) {
+	ln, err := net.Listen("tcp", ":"+strings.Split(opts.ForwardAddr, ":")[0])
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
+
 	for {
+		spn.Suffix = " Waiting for local connection..."
+		spn.Start()
 		conn, err := ln.Accept()
 		if err != nil {
-			logrus.Error(err)
+			log.Error(err)
 			continue
 		}
-		qs := qsocket.NewSocket(opts.Secret)
-		err = qs.SetE2E(opts.End2End)
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		err = qs.SetCertPinning(opts.CertPinning)
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		err = qs.AddIdTag(GetPeerTag(opts))
-		if err != nil {
-			logrus.Fatal(err)
-		}
-
-		if opts.DisableEnc {
-			err = qs.DialTCP()
+		spn.Suffix = " Dialing qsocket relay network..."
+		if opts.SocksAddr != "" {
+			err = qs.DialProxy(opts.SocksAddr)
 		} else {
-			err = qs.Dial()
+			if opts.DisableEnc {
+				err = qs.DialTCP()
+			} else {
+				err = qs.Dial()
+			}
 		}
 		if err != nil {
-			logrus.Error(err)
+			spn.Stop()
+			log.Error(err)
 			continue
 		}
+		spn.Suffix = " Forwarding local traffic..."
 		go func() {
 			_, err = io.Copy(conn, qs)
 		}()
 		_, err = io.Copy(qs, conn)
 		if err != nil {
-			logrus.Error(err)
+			log.Debug(err)
 		}
 		qs.Close()
 		conn.Close()
@@ -164,32 +161,42 @@ func ServeToLocal(opts *config.Options) {
 }
 
 func Connect(opts *config.Options) error {
-	if opts.ForwardAddr != "" {
-		ServeToLocal(opts)
-		return nil
-	}
 	defer spn.Stop()
 	if !opts.Quiet {
 		spn.Suffix = " Dialing qsocket relay network..."
 		spn.Start()
 	}
-	var err error
+
 	qs := qsocket.NewSocket(opts.Secret)
-	err = qs.SetE2E(opts.End2End)
+	err := qs.SetE2E(opts.End2End)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	err = qs.SetCertPinning(opts.CertPinning)
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 	err = qs.AddIdTag(GetPeerTag(opts))
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 
-	if opts.UseTor {
-		err = qs.DialProxy("socks5://127.0.0.1:9050")
+	if opts.ForwardAddr != "" {
+		parts := strings.Split(opts.ForwardAddr, ":")
+		switch len(parts) {
+		case 2:
+			qs.SetForwardAddr(opts.ForwardAddr)
+		case 3:
+			qs.SetForwardAddr(fmt.Sprintf("%s:%s", parts[1], parts[2]))
+			ServeToLocal(qs, opts)
+		default:
+			spn.Stop()
+			log.Fatal("invalid forward address!")
+		}
+	}
+
+	if opts.SocksAddr != "" {
+		err = qs.DialProxy(opts.SocksAddr)
 	} else {
 		if opts.DisableEnc {
 			err = qs.DialTCP()

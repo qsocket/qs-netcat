@@ -12,8 +12,8 @@ import (
 	"syscall"
 
 	"github.com/creack/pty"
+	"github.com/qsocket/qs-netcat/log"
 	qsocket "github.com/qsocket/qsocket-go"
-	"github.com/sirupsen/logrus"
 	// _ "golang.org/x/mobile/app"
 )
 
@@ -49,7 +49,7 @@ func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 		go func() {
 			for range ch {
 				if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
-					logrus.Errorf("error resizing pty: %s", err)
+					log.Errorf("error resizing pty: %s", err)
 				}
 			}
 		}()
