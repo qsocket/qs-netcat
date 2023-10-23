@@ -11,7 +11,6 @@ import (
 
 	"github.com/qsocket/qs-netcat/config"
 	"github.com/qsocket/qs-netcat/log"
-	"github.com/qsocket/qs-netcat/utils"
 	qsocket "github.com/qsocket/qsocket-go"
 
 	"github.com/briandowns/spinner"
@@ -25,78 +24,58 @@ var (
 	spn                  = spinner.New(spinner.CharSets[9], 50*time.Millisecond)
 )
 
-func StartProbingQSRN(opts *config.Options) {
-	var (
-		err      error
-		firstRun bool = true
-	)
-	go utils.WaitForExitSignal(os.Interrupt)
+func ProbeQSRN(opts *config.Options) error {
 	// This is nessesary for persistence on windows
 	os.Unsetenv("QS_ARGS") // Remove this for allowing recursive qs-netcat usage
-
-	for {
-		if !firstRun {
-			time.Sleep(time.Duration(opts.ProbeInterval) * time.Second)
+	qs := qsocket.NewSocket(opts.Secret)
+	err := qs.SetE2E(opts.End2End)
+	if err != nil {
+		return err
+	}
+	if opts.CertFingerprint != "" {
+		err = qs.SetCertFingerprint(opts.CertFingerprint)
+		if err != nil {
+			return err
+		}
+	}
+	err = qs.AddIdTag(GetPeerTag(opts))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if opts.SocksAddr != "" {
+		err = qs.DialProxy(opts.SocksAddr)
+	} else {
+		if opts.DisableEnc {
+			err = qs.DialTCP()
 		} else {
-			firstRun = false
+			err = qs.Dial()
 		}
-		qs := qsocket.NewSocket(opts.Secret)
-		err = qs.SetE2E(opts.End2End)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if opts.CertFingerprint != "" {
-			err = qs.SetCertFingerprint(opts.CertFingerprint)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		err = qs.AddIdTag(GetPeerTag(opts))
-		if err != nil {
-			log.Fatal(err)
-		}
-		if opts.SocksAddr != "" {
-			err = qs.DialProxy(opts.SocksAddr)
-		} else {
-			if opts.DisableEnc {
-				err = qs.DialTCP()
-			} else {
-				err = qs.Dial()
-			}
-		}
-		if err != nil {
-			if err == qsocket.ErrAddressInUse {
-				log.Fatal(err)
-			}
-			if err != qsocket.ErrConnRefused {
-				log.Error(err)
-			}
-			continue
-		}
+	}
+	if err != nil {
+		return err
+	}
+	log.Info("Starting new session...")
 
-		// First check if forwarding enabled
-		if qs.GetForwardAddr() != "" {
-			// Redirect traffic to forward addr
-			err = CreateOnConnectPipe(qs, qs.GetForwardAddr())
-			if err != nil {
-				log.Error(err)
-			}
-			continue
+	// First check if forwarding enabled
+	if qs.GetForwardAddr() != "" {
+		// Redirect traffic to forward addr
+		err = CreateOnConnectPipe(qs, qs.GetForwardAddr())
+		if err != nil {
+			return err
 		}
+	}
 
-		// If non specified spawn OS shell...
-		if opts.Execute == "" {
-			opts.Execute = SHELL
-		}
+	// If non specified spawn OS shell...
+	if opts.Execute == "" {
+		opts.Execute = SHELL
+	}
 
+	go func() {
 		// Execute command/program and redirect stdin/out/err
 		err = ExecCommand(opts.Execute, qs, opts.Interactive)
-		if err != nil && !strings.Contains(err.Error(), "connection reset by peer") {
-			log.Error(err)
-			continue
-		}
-
-	}
+	}()
+	time.Sleep(300 * time.Millisecond) // Wait for instant errors
+	return err
 }
 
 func CreateOnConnectPipe(qs *qsocket.QSocket, addr string) error {

@@ -58,7 +58,7 @@ func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 
 		// Copy stdin to the pty and the pty to stdout.
 		// NOTE: The goroutine will keep reading until the next keystroke before returning.
-		go func() { io.Copy(ptmx, conn) }()
+		go io.Copy(ptmx, conn)
 		io.Copy(conn, ptmx)
 		return nil
 	}
@@ -66,5 +66,5 @@ func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 	cmd.Stdin = conn
 	cmd.Stdout = conn
 	cmd.Stderr = conn
-	return cmd.Run()
+	return cmd.Start()
 }
