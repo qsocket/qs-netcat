@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -10,11 +11,10 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/fatih/color"
+	"github.com/mdp/qrterminal/v3"
 	"github.com/qsocket/qs-netcat/log"
 	"github.com/qsocket/qs-netcat/utils"
 )
-
-var Version = "?"
 
 const (
 	USAGE_EAMPLES = `
@@ -32,26 +32,29 @@ Example for a reverse shell:
 )
 
 var (
+	Version        = "?"
 	ForwardAddrRgx = regexp.MustCompile(`([0-9]{1,5}:|)(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}`)
 )
 
 // Main config struct for parsing the TOML file
 type Options struct {
-	Secret        string `help:"Secret (e.g. password)." name:"secret" short:"s"`
-	Execute       string `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
-	ForwardAddr   string `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
-	SocksAddr     string `help:"User socks proxy address for connecting QSRN." name:"socks" short:"x"`
-	ProbeInterval int    `help:"Probe interval for connecting QSRN." name:"probe" short:"n" default:"5"`
-	DisableEnc    bool   `help:"Disable all encryption." name:"plain" short:"C"`
-	End2End       bool   `help:"Use E2E encryption. (default:true)" name:"e2e" default:"true"`
-	Interactive   bool   `help:"Execute with a PTY shell." name:"interactive" short:"i"`
-	Listen        bool   `help:"Server mode. (listen for connections)" name:"listen" short:"l"`
-	RandomSecret  bool   `help:"Generate a Secret. (random)" name:"generate" short:"g"`
-	CertPinning   bool   `help:"Enable certificate pinning on TLS connections." name:"pin" short:"K"`
-	Quiet         bool   `help:"Quiet mode. (no stdout)" name:"quiet" short:"q"`
-	UseTor        bool   `help:"Use TOR for connecting QSRN." name:"tor" short:"T"`
-	Verbose       bool   `help:"Verbose mode." name:"verbose" short:"v"`
-	Version       kong.VersionFlag
+	Secret          string `help:"Secret (e.g. password)." name:"secret" short:"s"`
+	Execute         string `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
+	ForwardAddr     string `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
+	SocksAddr       string `help:"User socks proxy address for connecting QSRN." name:"socks" short:"x"`
+	CertFingerprint string `help:"Hex encoded TLS certificate fingerprint for validation." name:"cert-fp"`
+	ProbeInterval   int    `help:"Probe interval for connecting QSRN." name:"probe" short:"n" default:"5"`
+	DisableEnc      bool   `help:"Disable all encryption." name:"plain" short:"C"`
+	End2End         bool   `help:"Use E2E encryption. (default:true)" name:"e2e" default:"true"`
+	Interactive     bool   `help:"Execute with a PTY shell." name:"interactive" short:"i"`
+	Listen          bool   `help:"Server mode. (listen for connections)" name:"listen" short:"l"`
+	RandomSecret    bool   `help:"Generate a Secret. (random)" name:"generate" short:"g"`
+	CertPinning     bool   `help:"Enable certificate pinning on TLS connections." name:"pin" short:"K"`
+	Quiet           bool   `help:"Quiet mode. (no stdout)" name:"quiet" short:"q"`
+	UseTor          bool   `help:"Use TOR for connecting QSRN." name:"tor" short:"T"`
+	GenerateQR      bool   `help:"Generate a QR code with given stdin and print on the terminal." name:"qr"`
+	Verbose         bool   `help:"Verbose mode." name:"verbose" short:"v"`
+	Version         kong.VersionFlag
 }
 
 func HelpPrompt(options kong.HelpOptions, ctx *kong.Context) error {
@@ -76,7 +79,6 @@ func ConfigureOptions() (*Options, error) {
 
 	// Parse arguments and check for errors
 	opts := &Options{}
-
 	parser, err := kong.New(
 		opts,
 		kong.Help(HelpPrompt),
@@ -92,6 +94,24 @@ func ConfigureOptions() (*Options, error) {
 	_, err = parser.Parse(args)
 	if err != nil {
 		return nil, err
+	}
+
+	if opts.GenerateQR {
+		in, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return nil, err
+		}
+
+		qcfg := qrterminal.Config{
+			Level:     qrterminal.M,
+			Writer:    os.Stdout,
+			BlackChar: qrterminal.WHITE,
+			WhiteChar: qrterminal.BLACK,
+			QuietZone: 1,
+		}
+
+		qrterminal.GenerateWithConfig(string(in), qcfg)
+		os.Exit(0)
 	}
 
 	// Generate random secret
@@ -165,7 +185,7 @@ func (opts *Options) Summarize() {
 		if opts.End2End {
 			fmt.Printf(" Encryption: %s\n", DEFAULT_E2E_CIPHER)
 		} else {
-			fmt.Println(" Encryption: TLS (v1.2)")
+			fmt.Println(" Encryption: TLS")
 		}
 	}
 

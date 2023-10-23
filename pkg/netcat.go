@@ -45,9 +45,11 @@ func StartProbingQSRN(opts *config.Options) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = qs.SetCertPinning(opts.CertPinning)
-		if err != nil {
-			log.Fatal(err)
+		if opts.CertFingerprint != "" {
+			err = qs.SetCertFingerprint(opts.CertFingerprint)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		err = qs.AddIdTag(GetPeerTag(opts))
 		if err != nil {
@@ -172,9 +174,11 @@ func Connect(opts *config.Options) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = qs.SetCertPinning(opts.CertPinning)
-	if err != nil {
-		log.Fatal(err)
+	if opts.CertFingerprint != "" {
+		err = qs.SetCertFingerprint(opts.CertFingerprint)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	err = qs.AddIdTag(GetPeerTag(opts))
 	if err != nil {

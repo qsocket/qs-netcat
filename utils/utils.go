@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/fatih/color"
 )
@@ -31,7 +30,7 @@ func CaclChecksum(data []byte, base uint) uint {
 }
 
 func RandomString(n int) string {
-	rand.Seed(time.Now().UTC().UnixNano())
+	// rand.Seed(time.Now().UTC().UnixMicro())
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 	b := make([]rune, n)
 	for i := range b {

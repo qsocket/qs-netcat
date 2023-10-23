@@ -31,6 +31,9 @@
 qs-netcat is a cross-platform networking utility which reads and writes E2E encrypted data across systems using the QSocket relay network ([QSRN][qsrn]).
 It allows redirecting true PTY sessions with reverse connections, effectively allowing remote access to systems, forwarding traffic, and transferring files to and from systems under NAT networks or firewalls.
 
+> [!WARNING]  
+> This tool is in its early alpha development stage, featuring experimental functionality that may lack backwards compatibility, and users are advised to exercise caution and not use it in production environments.
+
 ## Installation
 
 [![Open in Cloud Shell](.github/img/cloud-shell.png)][google-cloud-shell]
