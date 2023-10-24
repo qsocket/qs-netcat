@@ -13,7 +13,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.19
+        go-version: 1.21
     - name: Make All Targets
       run: make all
     - name: 'Upload Artifact'
@@ -29,7 +29,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.19
+        go-version: 1.21
     - name: Make Build
       run: make
     - name: Test Run
@@ -41,7 +41,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.19
+        go-version: 1.21
     - name: Make Build
       run: make
     - name: Test Run
@@ -53,7 +53,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.19
+        go-version: 1.21
     - name: Make Build
       run: make
     - name: Test Run
