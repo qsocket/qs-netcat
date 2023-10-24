@@ -85,6 +85,8 @@ Flags:
   -s, --secret=STRING     Secret (e.g. password).
   -e, --exec=STRING       Execute command [e.g. "bash -il" or "cmd.exe"]
   -f, --forward=STRING    IP:PORT for traffic forwarding.
+  -x, --socks=STRING      User socks proxy address for connecting QSRN.
+      --cert-fp=STRING    Hex encoded TLS certificate fingerprint for validation.
   -n, --probe=5           Probe interval for connecting QSRN.
   -C, --plain             Disable all encryption.
       --e2e               Use E2E encryption. (default:true)
@@ -94,25 +96,25 @@ Flags:
   -K, --pin               Enable certificate pinning on TLS connections.
   -q, --quiet             Quiet mode. (no stdout)
   -T, --tor               Use TOR for connecting QSRN.
+      --qr                Generate a QR code with given stdin and print on the terminal.
   -v, --verbose           Verbose mode.
       --version
 
 Example to forward traffic from port 2222 to 192.168.6.7:22:
-	$ qs-netcat -s MyCecret -l -f 192.168.6.7:22        # Server
-	$ qs-netcat -s MyCecret -f :2222                    # Client
+  $ qs-netcat -s MyCecret -l -f 2222:192.168.6.7:22
 Example file transfer:
 	$ qs-netcat -q -l -s MyCecret >warez.tar.gz         # Server
 	$ qs-netcat -q -s MyCecret <warez.tar.gz            # Client
 Example for a reverse shell:
 	$ qs-netcat -s MyCecret -l -i                       # Server
 	$ qs-netcat -s MyCecret -i                          # Client
-
 ```
 ### Examples
 - SSH from *Workstation B* to *Workstation A* through any firewall/NAT
 ```bash
-$ qs-netcat -f "localhost" -p 22 -l  # Workstation A
-$ qsocket ssh root@qsocket.io        # Workstation B
+$ qs-netcat -lis MySecret                       # Workstation A
+$ qs-netcat -s MySecret -f 4444:127.0.0.1:22    # Workstation B
+$ ssh root@localhost -p 4444                    # Workstation B
 ```
 - Log in to Workstation A from Workstation B through any firewall/NAT
 ```bash
@@ -124,6 +126,17 @@ $ qs-netcat -i      # Workstation B
 $ qs-netcat -q -s MySecret -l > file.txt     # Workstation A
 $ qs-netcat -q -s MySecret < file.txt        # Workstation B
 ```
+---
+**Crypto / Security Mumble Jumble**
+- The connections are end-2-end encrypted. This means from User-2-User (and not just to the Relay Network). The Relay Network relays only (encrypted) data to and from the Users.
+- The QSocket uses [SRP](https://en.wikipedia.org/wiki/Secure_Remote_Password_protocol) for ensuring [perfect forward secrecy](https://en.wikipedia.org/wiki/Forward_secrecy). This means that the session keys are always different, and recorded session traffic cannot be decrypted by the third parties even if the user secret is known.
+- The session key is 256 bit and ephemeral. It is freshly generated for every session and generated randomly (and is not based on the password).
+- A brute force attack against weak secrets requires a new TCP connection for every guess. But QSRN contains a strong load balancer which is limiting the consecutive connection attempts.
+- Do not use stupid passwords like 'password123'. Malice might pick the same (stupid) password by chance and connect. If in doubt use *qs-netcat -g* to generate a strong one. Alice's and Bob's password should at least be strong enough so that Malice can not guess it by chance while Alice is waiting for Bob to connect.
+- If Alice shares the same password with Bob and Charlie and either one of them connects then Alice can not tell if it is Bob or Charlie who connected.
+- Assume Alice shares the same password with Bob and Malice. When Alice stops listening for a connection then Malice could start to listen for the connection instead. Bob (when opening a new connection) can not tell if he is connecting to Alice or to Malice.
+- We did not invent SRP. It's a well-known protocol, and it is well-analyzed and trusted by the community. 
+
 
 https://user-images.githubusercontent.com/17179401/224060762-e0f121f6-431b-4eb5-8833-4a5d533003de.mp4
 
