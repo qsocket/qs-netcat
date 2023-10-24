@@ -16,13 +16,13 @@ import (
 	qsocket "github.com/qsocket/qsocket-go"
 )
 
-const ATTACH_PARENT_PROCESS = ^uintptr(0)
+// const ATTACH_PARENT_PROCESS = ^uintptr(0)
 const SHELL = "cmd.exe"
 
-func init() {
-	proc := syscall.MustLoadDLL("KERNEL32.dll").MustFindProc("AttachConsole")
-	proc.Call(ATTACH_PARENT_PROCESS) // We need this to get console output when using windowsgui subsystem.
-}
+// func init() {
+// 	proc := syscall.MustLoadDLL("KERNEL32.dll").MustFindProc("AttachConsole")
+// 	proc.Call(ATTACH_PARENT_PROCESS) // We need this to get console output when using windowsgui subsystem.
+// }
 
 func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 	defer conn.Close()
