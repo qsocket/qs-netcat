@@ -1,0 +1,26 @@
+
+name: release
+
+on:
+  workflow_dispatch:
+    branches: [ master ]
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.21
+    - name: Make All Targets
+      run: make all
+    - name: Package Builds
+    - run: ./mkrelease.sh
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: qs-netcat_all_builds
+        path: ./release/*
+        retention-days: 5
+  

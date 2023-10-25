@@ -9,6 +9,7 @@ RESET="$(printf '\e[0m')"
 ## Globals
 RELEASE_DIR="`pwd`/release"
 BUILD_DIR="`pwd`/build"
+UPX_VERSION="4.1.0"
 ERR_LOG="/dev/null"
 [[ ! -z $VERBOSE ]] && ERR_LOG="`tty`"
 
@@ -87,6 +88,15 @@ clean_exit() {
     kill -10 $$
 }
 
+download_upx() {
+  print_status "Downloading UPX v$UPX_VERSION ..."
+  wget "https://github.com/upx/upx/releases/download/v$UPX_VERSION/upx-$UPX_VERSION-amd64_linux.tar.xz" -O "/tmp/upx.tar.xz" &>$ERR_LOG || return 1
+  tar -C /tmp/ -xvf "/tmp/upx.tar.xz" &>$ERR_LOG || return 1
+  cp "/tmp/upx-$UPX_VERSION-amd64_linux/upx" "$BUILD_DIR/upx" &>$ERR_LOG || return 1
+  chmod +x "$BUILD_DIR/upx" &>$ERR_LOG || return 1
+  return 0
+}
+
 # Expects <platform> <architecture> and creates a tar.gz archive after compressing the binary with UPX. 
 # $1 = <linux>
 # $2 = <amd64>
@@ -95,7 +105,7 @@ package_release_binary() {
     [[ $1 == "windows" ]] && bin_suffix=".exe"
     cp "$BUILD_DIR/$1/qs-netcat-${2}${bin_suffix}" "$BUILD_DIR/qs-netcat${bin_suffix}" &>$ERR_LOG || return 1
     print_verbose "Compressing $BUILD_DIR/$1/qs-netcat-$2${bin_suffix}..."
-    upx -q --best "$BUILD_DIR/qs-netcat${bin_suffix}" &>$ERR_LOG # Ignore errors...
+    "$BUILD_DIR/upx" -q --best "$BUILD_DIR/qs-netcat${bin_suffix}" &>$ERR_LOG # Ignore errors...
     print_verbose "Packaging $BUILD_DIR/$1/qs-netcat-$2${bin_suffix}..."
     tar -C "$BUILD_DIR" -czvf "$RELEASE_DIR/qs-netcat_$1_$arc.tar.gz" "./qs-netcat${bin_suffix}" &>$ERR_LOG || return 1
     return 0
@@ -105,6 +115,7 @@ package_release_binary() {
 [[ ! -d $BUILD_DIR ]] && print_fatal "Could not find build firectory! Exiting..."
 print_status "Initiating..."
 print_status "Release Date: `date`"
+download_upx || print_fatal "Failed downloading UPX!"
 echo ""
 mkdir -p release
 declare -a arcs=("amd64" "386" "arm" "arm64" "mips" "mips64" "mips64le" "mipsle" "ppc64" "ppc64le" "s390x")
@@ -184,7 +195,6 @@ package_release_binary "aix" "ppc64" && print_ok || print_fail
 print_good "All done!"
 
 cd $RELEASE_DIR
-echo "Early alpha builds for testing."
 echo -e "\n\`\`\`"
 sha1sum *
 echo -e "\`\`\`\n"
