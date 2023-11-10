@@ -145,7 +145,7 @@ https://user-images.githubusercontent.com/17179401/224060762-e0f121f6-431b-4eb5-
 <details>
 <summary>RDP connection over QSRN</summary>
 
-https://user-images.githubusercontent.com/17179401/213314447-65ecaf43-89fd-48bd-a242-3345f6baf185.mov
+https://github.com/qsocket/qs-netcat/assets/17179401/af46c8fb-cb33-483a-b5c1-9142843da2bd
 
 </details>
 
@@ -154,5 +154,5 @@ https://user-images.githubusercontent.com/17179401/213314447-65ecaf43-89fd-48bd-
 <summary>ADB access over QSRN</summary>
 
 https://user-images.githubusercontent.com/17179401/216651601-6ddc8ddf-7248-4c2b-bd77-00f00f773c80.mov
-
+    
 </details>
