@@ -14,8 +14,9 @@ import (
 func main() {
 	// Configure the options from the flags/config file
 	opts, err := config.ConfigureOptions()
-	if err != nil {
+	if err != nil || opts == nil {
 		log.Fatal(err)
+		return
 	}
 	if opts.RandomSecret {
 		opts.Secret = utils.RandomString(20)

@@ -4,6 +4,7 @@
 package qsnetcat
 
 import (
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -21,6 +22,9 @@ const SHELL = "/bin/bash -il"
 func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 	defer conn.Close()
 	params := strings.Split(comm, " ")
+	if len(params) < 1 {
+		return errors.New("command parsing failed")
+	}
 	ncDir, err := os.Executable() // Get the full path of the executalbe.
 	if err != nil {
 		return err
@@ -28,6 +32,9 @@ func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 	os.Setenv("qs_netcat", ncDir)      // Set binary dir to env variable for easy access.
 	os.Setenv("HISTFILE", "/dev/null") // Unset histfile for disabling logging.
 	cmd := exec.Command(params[0])
+	if cmd == nil {
+		return errors.New("exec.Command returned nil")
+	}
 	if len(params) > 1 {
 		cmd = exec.Command(params[0], params[1:]...)
 	}

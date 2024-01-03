@@ -69,6 +69,9 @@ func HelpPrompt(options kong.HelpOptions, ctx *kong.Context) error {
 // specific flags. On success, an options structure is returned configured
 // based on the selected flags.
 func ConfigureOptions() (*Options, error) {
+	if os.Args == nil {
+		return nil, errors.New("os.Args is nil")
+	}
 	// If QS_ARGS exists overwrite the given arguments.
 	qsArgs := os.Getenv("QS_ARGS")
 	args := os.Args[1:]
@@ -148,7 +151,7 @@ func ConfigureOptions() (*Options, error) {
 }
 
 func (opts *Options) Summarize() {
-	if opts.Quiet {
+	if opts == nil || opts.Quiet {
 		return
 	}
 	yellow := color.New(color.FgYellow)

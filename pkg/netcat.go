@@ -143,6 +143,9 @@ func ServeToLocal(qs *qsocket.QSocket, opts *config.Options) {
 
 func Connect(opts *config.Options) error {
 	defer spn.Stop()
+	if opts == nil {
+		return errors.New("options are not initialized")
+	}
 	if !opts.Quiet {
 		spn.Suffix = " Dialing qsocket relay network..."
 		spn.Start()
