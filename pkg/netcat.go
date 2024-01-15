@@ -43,7 +43,7 @@ func ProbeQSRN(opts *config.Options) error {
 		log.Fatal(err)
 	}
 	if opts.SocksAddr != "" {
-		err = qs.DialProxy(opts.SocksAddr)
+		err = qs.DialProxy(opts.SocksAddr, !opts.DisableEnc)
 	} else {
 		if opts.DisableEnc {
 			err = qs.DialTCP()
@@ -115,7 +115,7 @@ func ServeToLocal(qs *qsocket.QSocket, opts *config.Options) {
 		}
 		spn.Suffix = " Dialing qsocket relay network..."
 		if opts.SocksAddr != "" {
-			err = qs.DialProxy(opts.SocksAddr)
+			err = qs.DialProxy(opts.SocksAddr, !opts.DisableEnc)
 		} else {
 			if opts.DisableEnc {
 				err = qs.DialTCP()
@@ -182,7 +182,7 @@ func Connect(opts *config.Options) error {
 	}
 
 	if opts.SocksAddr != "" {
-		err = qs.DialProxy(opts.SocksAddr)
+		err = qs.DialProxy(opts.SocksAddr, !opts.DisableEnc)
 	} else {
 		if opts.DisableEnc {
 			err = qs.DialTCP()

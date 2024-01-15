@@ -127,7 +127,11 @@ func ConfigureOptions() (*Options, error) {
 	}
 
 	if opts.UseTor {
-		opts.SocksAddr = "socks5://127.0.0.1:9050"
+		opts.SocksAddr = "127.0.0.1:9050"
+	}
+
+	if opts.DisableEnc {
+		opts.End2End = false
 	}
 
 	if !opts.RandomSecret && opts.Secret == "" {
