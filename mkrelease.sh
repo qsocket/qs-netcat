@@ -104,13 +104,14 @@ package_release_binary() {
     local bin_suffix=""
     [[ $1 == "windows" ]] && bin_suffix=".exe"
     cp "$BUILD_DIR/$1/qs-netcat-${2}${bin_suffix}" "$BUILD_DIR/qs-netcat${bin_suffix}" &>$ERR_LOG || return 1
-    print_verbose "Compressing $BUILD_DIR/$1/qs-netcat-$2${bin_suffix}..."
-    "$BUILD_DIR/upx" -q --best "$BUILD_DIR/qs-netcat${bin_suffix}" &>$ERR_LOG # Ignore errors...
+    if [ "$3" != false ]; then
+      print_verbose "Compressing $BUILD_DIR/$1/qs-netcat-$2${bin_suffix}..."
+      "$BUILD_DIR/upx" -q --best "$BUILD_DIR/qs-netcat${bin_suffix}" &>$ERR_LOG # Ignore errors...
+    fi
     print_verbose "Packaging $BUILD_DIR/$1/qs-netcat-$2${bin_suffix}..."
     tar -C "$BUILD_DIR" -czvf "$RELEASE_DIR/qs-netcat_$1_$arc.tar.gz" "./qs-netcat${bin_suffix}" &>$ERR_LOG || return 1
     return 0
 }
-
 
 [[ ! -d $BUILD_DIR ]] && print_fatal "Could not find build firectory! Exiting..."
 print_status "Initiating..."
@@ -136,7 +137,7 @@ declare -a arcs=("amd64" "arm64")
 for arc in "${arcs[@]}"
 do
     print_progress "Packaging darwin-$arc binary"
-    package_release_binary "darwin" $arc && print_ok || print_fail
+    package_release_binary "darwin" $arc "false" && print_ok || print_fail
 done
 
 # declare -a arcs=("amd64" "arm64")
