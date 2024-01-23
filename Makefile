@@ -26,6 +26,7 @@ linux:
 	GOOS=linux GOARCH=ppc64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/linux/qs-netcat-ppc64
 	GOOS=linux GOARCH=ppc64le ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/linux/qs-netcat-ppc64le
 	GOOS=linux GOARCH=s390x ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/linux/qs-netcat-s390x
+	GOOS=linux GOARCH=s390x ${BUILD} -trimpath -buildvcs=false -ldflags="-extldflags=-static -s -w" -o ${OUT_DIR}/linux/qs-netcat-riscv64
 freebsd:
 	GOOS=freebsd GOARCH=amd64 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/freebsd/qs-netcat-amd64
 	GOOS=freebsd GOARCH=386 ${BUILD} ${BUILD_FLAGS} -o ${OUT_DIR}/freebsd/qs-netcat-386

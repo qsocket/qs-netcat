@@ -119,7 +119,7 @@ print_status "Release Date: `date`"
 download_upx || print_fatal "Failed downloading UPX!"
 echo ""
 mkdir -p release
-declare -a arcs=("amd64" "386" "arm" "arm64" "mips" "mips64" "mips64le" "mipsle" "ppc64" "ppc64le" "s390x")
+declare -a arcs=("amd64" "386" "arm" "arm64" "mips" "mips64" "mips64le" "mipsle" "ppc64" "ppc64le" "s390x" "riscv64")
 for arc in "${arcs[@]}"
 do
     print_progress "Packaging linux-$arc binary"
