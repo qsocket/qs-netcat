@@ -5,25 +5,36 @@ package qsnetcat
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	"os/signal"
-	"strings"
 	"syscall"
+	"unsafe"
 
 	"github.com/creack/pty"
+	"github.com/google/shlex"
 	"github.com/qsocket/qs-netcat/log"
 	qsocket "github.com/qsocket/qsocket-go"
 )
 
 const SHELL = "/bin/bash -il"
 
-func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
+var (
+	PtyHeight int = 39
+	PtyWidth  int = 157
+)
+
+func ExecCommand(conn *qsocket.QSocket, specs *SessionSpecs) error {
+	// If non specified spawn OS shell...
+	if specs.Command == "" {
+		specs.Command = SHELL
+	}
+
 	defer conn.Close()
-	params := strings.Split(comm, " ")
-	if len(params) < 1 {
-		return errors.New("command parsing failed")
+	params, err := shlex.Split(specs.Command)
+	if err != nil {
+		return err
 	}
 	ncDir, err := os.Executable() // Get the full path of the executalbe.
 	if err != nil {
@@ -39,9 +50,13 @@ func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 		cmd = exec.Command(params[0], params[1:]...)
 	}
 
-	if interactive {
+	if specs.Interactive {
+
 		// Start the command with a pty.
-		ptmx, err := pty.Start(cmd)
+		ptmx, err := pty.StartWithSize(
+			cmd,
+			&pty.Winsize{Cols: specs.TermSize.Cols, Rows: specs.TermSize.Rows},
+		)
 		if err != nil {
 			return err
 		}
@@ -49,29 +64,34 @@ func ExecCommand(comm string, conn *qsocket.QSocket, interactive bool) error {
 		// Make sure to close the pty at the end.
 		defer ptmx.Close() // Best effort.
 
-		// Handle pty size.
-		ch := make(chan os.Signal, 1)
-		signal.Notify(ch, syscall.SIGWINCH)
-		go func() {
-			for range ch {
-				if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
-					log.Errorf("error resizing pty: %s", err)
-				}
-			}
-		}()
-		ch <- syscall.SIGWINCH // Initial resize.
-		defer signal.Stop(ch)  // Cleanup signals when done.
-		defer close(ch)
-
 		// Copy stdin to the pty and the pty to stdout.
 		// NOTE: The goroutine will keep reading until the next keystroke before returning.
 		go io.Copy(ptmx, conn)
 		io.Copy(conn, ptmx)
 		return nil
+	} else {
+		// Handle pty size.
+		err = pty.Setsize(os.Stdin, &pty.Winsize{Rows: specs.TermSize.Rows, Cols: specs.TermSize.Cols})
+		if err != nil {
+			log.Error(err)
+		}
 	}
 
 	cmd.Stdin = conn
 	cmd.Stdout = conn
 	cmd.Stderr = conn
 	return cmd.Start()
+}
+
+func GetCurrentTermSize() (*Winsize, error) {
+	ws := &Winsize{}
+	retCode, _, errno := syscall.Syscall(syscall.SYS_IOCTL,
+		uintptr(syscall.Stdin),
+		uintptr(syscall.TIOCGWINSZ),
+		uintptr(unsafe.Pointer(ws)))
+
+	if int(retCode) == -1 {
+		return nil, fmt.Errorf("TIOCGWINSZ syscall failed with %d!", errno)
+	}
+	return ws, nil
 }

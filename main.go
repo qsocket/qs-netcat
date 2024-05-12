@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"os"
 	"time"
 
@@ -35,11 +36,11 @@ func main() {
 			}
 			err := qsnetcat.ProbeQSRN(opts)
 			if err != nil {
-				if err == qsocket.ErrAddressInUse {
+				switch err {
+				case qsocket.ErrPeerNotFound, io.EOF:
+					log.Debug(err)
+				default:
 					log.Fatal(err)
-				}
-				if err != qsocket.ErrConnRefused {
-					log.Error(err)
 				}
 			}
 		}

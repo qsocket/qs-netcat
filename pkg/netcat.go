@@ -18,9 +18,9 @@ import (
 )
 
 var (
-	ErrQsocketSessionEnd = errors.New("qsocket session has ended")
+	ErrQsocketSessionEnd = errors.New("QSocket session has ended")
 	ErrTtyFailed         = errors.New("TTY initialization failed")
-	ErrUntrustedCert     = errors.New("certificate fingerprint mismatch")
+	ErrUntrustedCert     = errors.New("Certificate fingerprint mismatch")
 	spn                  = spinner.New(spinner.CharSets[9], 50*time.Millisecond)
 )
 
@@ -38,43 +38,55 @@ func ProbeQSRN(opts *config.Options) error {
 			return err
 		}
 	}
-	err = qs.AddIdTag(GetPeerTag(opts))
-	if err != nil {
-		log.Fatal(err)
-	}
-	if opts.SocksAddr != "" {
-		err = qs.DialProxy(opts.SocksAddr, !opts.DisableEnc)
-	} else {
-		if opts.DisableEnc {
-			err = qs.DialTCP()
-		} else {
-			err = qs.Dial()
-		}
-	}
+	err = qs.SetIdTag(GetPeerTag(opts))
 	if err != nil {
 		return err
 	}
-	log.Info("Starting new session...")
-
-	// First check if forwarding enabled
-	if qs.GetForwardAddr() != "" {
-		// Redirect traffic to forward addr
-		err = CreateOnConnectPipe(qs, qs.GetForwardAddr())
+	if opts.SocksAddr != "" {
+		err = qs.SetProxy(opts.SocksAddr)
 		if err != nil {
 			return err
 		}
 	}
 
-	// If non specified spawn OS shell...
-	if opts.Execute == "" {
-		opts.Execute = SHELL
+	// Dial QSRN...
+	if opts.DisableEnc {
+		err = qs.DialTCP()
+	} else {
+		err = qs.Dial()
+	}
+	if err != nil {
+		return err
+	}
+
+	log.Debug("Recving session specs...")
+	specs, err := RecvSessionSpecs(qs, opts)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Starting new session...")
+	// Resize terminal with client dimentions...
+	log.Debugf("Got term size: %dx%d", specs.TermSize.Rows, specs.TermSize.Cols)
+	log.Debugf("Got command: %s", specs.Command)
+	log.Debugf("Got forward: %s", specs.ForwardAddr)
+
+	// First check if forwarding enabled
+	if specs.ForwardAddr != "" {
+		// Redirect traffic to forward addr
+		err = CreateOnConnectPipe(qs, specs.ForwardAddr)
+		if err != nil {
+			return err
+		}
 	}
 
 	go func() {
 		// Execute command/program and redirect stdin/out/err
-		err = ExecCommand(opts.Execute, qs, opts.Interactive)
+		err = ExecCommand(qs, specs)
+		if err != nil {
+			log.Error(err)
+		}
 	}()
-	time.Sleep(300 * time.Millisecond) // Wait for instant errors
 	return err
 }
 
@@ -115,13 +127,15 @@ func ServeToLocal(qs *qsocket.QSocket, opts *config.Options) {
 		}
 		spn.Suffix = " Dialing qsocket relay network..."
 		if opts.SocksAddr != "" {
-			err = qs.DialProxy(opts.SocksAddr, !opts.DisableEnc)
-		} else {
-			if opts.DisableEnc {
-				err = qs.DialTCP()
-			} else {
-				err = qs.Dial()
+			err = qs.SetProxy(opts.SocksAddr)
+			if err != nil {
+				log.Fatal(err)
 			}
+		}
+		if opts.DisableEnc {
+			err = qs.DialTCP()
+		} else {
+			err = qs.Dial()
 		}
 		if err != nil {
 			spn.Stop()
@@ -162,7 +176,7 @@ func Connect(opts *config.Options) error {
 			log.Fatal(err)
 		}
 	}
-	err = qs.AddIdTag(GetPeerTag(opts))
+	err = qs.SetIdTag(GetPeerTag(opts))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -171,28 +185,35 @@ func Connect(opts *config.Options) error {
 		parts := strings.Split(opts.ForwardAddr, ":")
 		switch len(parts) {
 		case 2:
-			qs.SetForwardAddr(opts.ForwardAddr)
 		case 3:
-			qs.SetForwardAddr(fmt.Sprintf("%s:%s", parts[1], parts[2]))
+			opts.ForwardAddr = fmt.Sprintf("%s:%s", parts[1], parts[2])
 			ServeToLocal(qs, opts)
 		default:
 			spn.Stop()
-			log.Fatal("invalid forward address!")
+			log.Fatal("Invalid forward address!")
 		}
 	}
-
 	if opts.SocksAddr != "" {
-		err = qs.DialProxy(opts.SocksAddr, !opts.DisableEnc)
-	} else {
-		if opts.DisableEnc {
-			err = qs.DialTCP()
-		} else {
-			err = qs.Dial()
+		err = qs.SetProxy(opts.SocksAddr)
+		if err != nil {
+			log.Fatal(err)
 		}
+	}
+	if opts.DisableEnc {
+		err = qs.DialTCP()
+	} else {
+		err = qs.Dial()
 	}
 	if err != nil {
 		return err
 	}
+
+	log.Debug("Sending session specs...")
+	err = SendSessionSpecs(qs, opts)
+	if err != nil {
+		return err
+	}
+
 	return AttachToSocket(qs, opts.Interactive)
 }
 
@@ -213,12 +234,8 @@ func AttachToSocket(conn *qsocket.QSocket, interactive bool) error {
 }
 
 func GetPeerTag(opts *config.Options) byte {
-	tag := byte(qsocket.TAG_PEER_CLI)
 	if opts.Listen {
-		tag = qsocket.TAG_PEER_SRV
+		return qsocket.PEER_SRV
 	}
-	if opts.ForwardAddr != "" {
-		tag |= qsocket.TAG_PEER_PROXY
-	}
-	return tag
+	return qsocket.PEER_CLI
 }
