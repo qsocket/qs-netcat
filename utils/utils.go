@@ -5,19 +5,42 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/fatih/color"
+	"github.com/qsocket/qs-netcat/log"
 )
 
+var (
+	Red        = color.New(color.FgRed)
+	Blue       = color.New(color.FgBlue)
+	Yellow     = color.New(color.FgYellow)
+	BoldRed    = color.New(color.FgRed).Add(color.Bold)
+	BoldBlue   = color.New(color.FgBlue).Add(color.Bold)
+	BoldGreen  = color.New(color.FgGreen).Add(color.Bold)
+	BoldYellow = color.New(color.FgYellow).Add(color.Bold)
+)
+
+func EnableSmartPipe() {
+	color.NoColor = false
+	os.Stdout = os.NewFile(uintptr(syscall.Stderr), "stderr")
+}
+
+func IsFilePiped(f *os.File) bool {
+	fs, err := f.Stat()
+	if err != nil {
+		log.Error(err)
+	}
+	return (fs.Mode() & os.ModeCharDevice) == 0
+}
+
 func PrintFatal(format string, a ...any) {
-	yellow := color.New(color.FgRed).Add(color.Bold)
-	yellow.Print("[!] ")
+	fmt.Printf("%s ", Red.Sprintf("[!]"))
 	fmt.Printf(format, a...)
 }
 
 func PrintStatus(format string, a ...any) {
-	yellow := color.New(color.FgYellow).Add(color.Bold)
-	yellow.Print("[*] ")
+	fmt.Printf("%s ", Yellow.Sprintf("[*]"))
 	fmt.Printf(format, a...)
 }
 

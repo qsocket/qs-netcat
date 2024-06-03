@@ -39,8 +39,10 @@ func main() {
 				switch err {
 				case qsocket.ErrPeerNotFound, io.EOF:
 					log.Debug(err)
-				default:
+				case qsocket.ErrServerCollision:
 					log.Fatal(err)
+				default:
+					log.Error(err)
 				}
 			}
 		}
@@ -48,7 +50,7 @@ func main() {
 	}
 
 	err = qsnetcat.Connect(opts)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		log.Error(err)
 	}
 }

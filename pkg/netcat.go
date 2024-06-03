@@ -80,6 +80,10 @@ func ProbeQSRN(opts *config.Options) error {
 		}
 	}
 
+	if opts.IsPiped() {
+		return AttachToPipe(qs, opts)
+	}
+
 	go func() {
 		// Execute command/program and redirect stdin/out/err
 		err = ExecCommand(qs, specs)
@@ -158,7 +162,7 @@ func ServeToLocal(qs *qsocket.QSocket, opts *config.Options) {
 func Connect(opts *config.Options) error {
 	defer spn.Stop()
 	if opts == nil {
-		return errors.New("options are not initialized")
+		return errors.New("Options are not initialized")
 	}
 	if !opts.Quiet {
 		spn.Suffix = " Dialing qsocket relay network..."
@@ -214,7 +218,63 @@ func Connect(opts *config.Options) error {
 		return err
 	}
 
+	if opts.IsPiped() {
+		return AttachToPipe(qs, opts)
+	}
 	return AttachToSocket(qs, opts.Interactive)
+}
+
+func AttachToPipe(conn *qsocket.QSocket, opts *config.Options) error {
+	finalMsg := "No pipe is initialized..."
+	defer func() { log.Info(finalMsg) }()
+	if opts.InPipe != nil {
+		spn.Suffix = fmt.Sprintf(" Reading from %s...", opts.InPipe.Name())
+		spn.Start()
+		defer spn.Stop()
+		total := 0
+		for {
+			data := make([]byte, 1024)
+			n, err := opts.InPipe.Read(data)
+			if err != nil {
+				return err
+			}
+			if n == 0 {
+				continue
+			}
+			total += n
+			finalMsg = fmt.Sprintf("Sent %d bytes!", total)
+			spn.Suffix = fmt.Sprintf(" Piping %d bytes from %s...", total, opts.InPipe.Name())
+			n, err = conn.Write(data[:n])
+			if err != nil {
+				return err
+			}
+		}
+	} else if opts.OutPipe != nil {
+		spn = spinner.New(spinner.CharSets[9], 50*time.Millisecond, spinner.WithWriter(os.Stderr))
+		spn.Suffix = fmt.Sprintf(" Writing into %s...", opts.OutPipe.Name())
+		spn.Start()
+		defer spn.Stop()
+		total := 0
+		for {
+			data := make([]byte, 1024)
+			n, err := conn.Read(data)
+			if err != nil {
+				return err
+			}
+			if n == 0 {
+				continue
+			}
+			total += n
+			finalMsg = fmt.Sprintf("Received %d bytes!", total)
+			spn.Suffix = fmt.Sprintf(" Piping %d bytes to %s...", total, opts.OutPipe.Name())
+			n, err = opts.OutPipe.Write(data[:n])
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func AttachToSocket(conn *qsocket.QSocket, interactive bool) error {

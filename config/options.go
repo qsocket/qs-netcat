@@ -53,6 +53,8 @@ type Options struct {
 	UseTor          bool   `help:"Use TOR for connecting QSRN." name:"tor" short:"T"`
 	GenerateQR      bool   `help:"Generate a QR code with given stdin and print on the terminal." name:"qr"`
 	Verbose         bool   `help:"Verbose mode." name:"verbose" short:"v"`
+	InPipe          *os.File
+	OutPipe         *os.File
 	Version         kong.VersionFlag
 }
 
@@ -98,6 +100,15 @@ func ConfigureOptions() (*Options, error) {
 		return nil, err
 	}
 
+	if utils.IsFilePiped(os.Stdin) {
+		opts.InPipe = os.Stdin
+	}
+
+	if utils.IsFilePiped(os.Stdout) {
+		opts.OutPipe = os.Stdout
+		utils.EnableSmartPipe()
+	}
+
 	if opts.GenerateQR {
 		in, err := io.ReadAll(os.Stdin)
 		if err != nil {
@@ -123,7 +134,7 @@ func ConfigureOptions() (*Options, error) {
 	}
 
 	if opts.ForwardAddr != "" && !ForwardAddrRgx.MatchString(opts.ForwardAddr) {
-		return nil, errors.New("invalid forward address")
+		return nil, errors.New("Invalid forward address.")
 	}
 
 	if opts.UseTor {
@@ -154,46 +165,42 @@ func ConfigureOptions() (*Options, error) {
 	return opts, nil
 }
 
+func (opts *Options) IsPiped() bool {
+	return opts.InPipe != nil || opts.OutPipe != nil
+}
+
 func (opts *Options) Summarize() {
 	if opts == nil || opts.Quiet {
 		return
 	}
-	yellow := color.New(color.FgYellow)
-	byellow := color.New(color.FgYellow).Add(color.Bold)
-	red := color.New(color.FgRed)
-	blue := color.New(color.FgBlue)
+	encType := DEFAULT_E2E_CIPHER
 	mode := "client"
 	if opts.Listen {
 		mode = "server"
 	}
 
-	byellow.Printf("[#] %s\n", blue.Sprintf(".::Qsocket Netcat::."))
-	yellow.Print(" ├──>")
-	fmt.Printf(" Secret: %s\n", red.Sprintf(opts.Secret))
-	yellow.Print(" ├──>")
-	fmt.Printf(" Mode: %s\n", mode)
-	yellow.Print(" ├──>")
-	fmt.Printf(" TOR: %t\n", opts.UseTor)
+	fmt.Printf("%s %s\n", utils.BoldYellow.Sprintf("[#]"), utils.BoldBlue.Sprintf(".::Qsocket Netcat::."))
+	fmt.Printf("%s Secret: %s\n", utils.Yellow.Sprintf(" ├──>"), utils.Red.Sprintf(opts.Secret))
+	fmt.Printf("%s Mode: %s\n", utils.Yellow.Sprintf(" ├──>"), mode)
+	fmt.Printf("%s TOR: %t\n", utils.Yellow.Sprintf(" ├──>"), opts.UseTor)
 	if opts.ForwardAddr != "" {
-		yellow.Print(" ├──>")
-		fmt.Printf(" Forward: %s\n", opts.ForwardAddr)
+		fmt.Printf("%s Forward: %s\n", utils.Yellow.Sprintf(" ├──>"), opts.ForwardAddr)
 	}
-	yellow.Print(" ├──>")
 	if opts.Listen {
-		fmt.Printf(" Probe Interval: %s\n", time.Second*time.Duration(opts.ProbeInterval))
+		fmt.Printf("%s Probe Interval: %s\n", utils.Yellow.Sprintf(" ├──>"), time.Second*time.Duration(opts.ProbeInterval))
 	} else {
-		fmt.Printf(" Probe Duration: %s\n", time.Second*time.Duration(opts.ProbeInterval))
+		fmt.Printf("%s Probe Duration: %s\n", utils.Yellow.Sprintf(" ├──>"), time.Second*time.Duration(opts.ProbeInterval))
 	}
-	yellow.Print(" └──>")
+	if opts.InPipe != nil || opts.OutPipe != nil {
+		fmt.Printf("%s Pipe: true\n", utils.Yellow.Sprintf(" ├──>"))
+	}
 	if opts.DisableEnc {
-		fmt.Printf(" Encryption: %s\n", red.Sprintf("DISABLED"))
+		encType = utils.Red.Sprintf("DISABLED")
 	} else {
-		if opts.End2End {
-			fmt.Printf(" Encryption: %s\n", DEFAULT_E2E_CIPHER)
-		} else {
-			fmt.Println(" Encryption: TLS")
+		if !opts.End2End {
+			encType = "TLS"
 		}
 	}
-
+	fmt.Printf("%s Encryption: %s\n", utils.Yellow.Sprintf(" └──>"), encType)
 	print("\n")
 }

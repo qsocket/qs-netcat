@@ -28,9 +28,13 @@ func SendSessionSpecs(qs *qsocket.QSocket, opts *config.Options) error {
 		return qsocket.ErrSocketNotConnected
 	}
 
-	ws, err := GetCurrentTermSize()
-	if err != nil {
-		return err
+	ws := new(Winsize)
+	err := error(nil)
+	if !opts.IsPiped() {
+		ws, err = GetCurrentTermSize()
+		if err != nil {
+			return err
+		}
 	}
 
 	specs := SessionSpecs{
@@ -70,6 +74,19 @@ func RecvSessionSpecs(qs *qsocket.QSocket, opts *config.Options) (*SessionSpecs,
 
 	if err := dec.Decode(specs); err != nil {
 		return nil, err
+	}
+
+	if specs.TermSize.Cols == 0 &&
+		specs.TermSize.Rows == 0 &&
+		!opts.IsPiped() {
+		ws, err := GetCurrentTermSize()
+		if err != nil {
+			return nil, err
+		}
+		specs.TermSize = Winsize{
+			Cols: ws.Cols,
+			Rows: ws.Rows,
+		}
 	}
 
 	if specs.Command == "" {
