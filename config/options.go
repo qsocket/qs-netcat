@@ -19,13 +19,13 @@ import (
 const (
 	USAGE_EAMPLES = `
 Example to forward traffic from port 2222 to 192.168.6.7:22:
-  $ qs-netcat -s MyCecret -l -f 2222:192.168.6.7:22
+  $ qs-netcat -s MyCecret -f 2222:192.168.6.7:22
 Example file transfer:
-	$ qs-netcat -q -l -s MyCecret >warez.tar.gz         # Server
-	$ qs-netcat -q -s MyCecret <warez.tar.gz            # Client
+	$ qs-netcat -l -s MyCecret > warez.tar.gz         # Server
+	$ qs-netcat -s MyCecret < warez.tar.gz            # Client
 Example for a reverse shell:
-	$ qs-netcat -s MyCecret -l -i                       # Server
-	$ qs-netcat -s MyCecret -i                          # Client
+	$ qs-netcat -s MyCecret -l -i                     # Server
+	$ qs-netcat -s MyCecret -i                        # Client
 `
 	DEFAULT_E2E_CIPHER = "SRP-AES-GCM-256-E2E (Prime: 4096)"
 )
