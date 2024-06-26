@@ -14,6 +14,7 @@ import (
 	"github.com/mdp/qrterminal/v3"
 	"github.com/qsocket/qs-netcat/log"
 	"github.com/qsocket/qs-netcat/utils"
+	"github.com/qsocket/qsocket-go/qsocket"
 )
 
 const (
@@ -30,10 +31,7 @@ Example for a reverse shell:
 	DEFAULT_E2E_CIPHER = "SRP-AES-GCM-256-E2E (Prime: 4096)"
 )
 
-var (
-	Version        = "?"
-	ForwardAddrRgx = regexp.MustCompile(`([0-9]{1,5}:|)(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}`)
-)
+var ForwardAddrRgx = regexp.MustCompile(`([0-9]{1,5}:|)(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}`)
 
 // Main config struct for parsing the TOML file
 type Options struct {
@@ -87,7 +85,7 @@ func ConfigureOptions() (*Options, error) {
 		opts,
 		kong.Help(HelpPrompt),
 		kong.UsageOnError(),
-		kong.Vars{"version": Version},
+		kong.Vars{"version": qsocket.Version},
 		kong.ConfigureHelp(kong.HelpOptions{
 			Summary: true,
 		}),
