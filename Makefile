@@ -1,10 +1,10 @@
 CURRET_DIR=$(shell pwd)
 BUILD=CGO_ENABLED=0 go build
 OUT_DIR=${CURRET_DIR}/build
-BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-extldflags=-static -s -w -X github.com/qsocket/qsocket-go/qsocket.Version=$$(git describe --tags)"
-WIN_BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-H windowsgui -s -w -X github.com/qsocket/qsocket-go/qsocket.Version=$$(git describe --tags)"
+BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-extldflags=-static -s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git describe --tags)"
+WIN_BUILD_FLAGS=-trimpath -buildvcs=false -ldflags="-H windowsgui -s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git describe --tags)"
 ANDROID_API=33
-ANDROID_BUILD=CGO_ENABLED=1 go build -trimpath -buildvcs=false -ldflags="-s -w -X github.com/qsocket/qsocket-go/qsocket.Version=$$(git describe --tags)"
+ANDROID_BUILD=CGO_ENABLED=1 go build -trimpath -buildvcs=false -ldflags="-s -w -X github.com/qsocket/qs-netcat/config.Version=$$(git describe --tags)"
 $(shell mkdir -p build/{windows,linux,darwin,android,ios,freebsd,openbsd,solaris,aix,illumos,dragonfly})
 
 default:
@@ -67,4 +67,4 @@ dragonfly:
 clean:
 	rm -rfv ./build
 
-all: linux windows darwin freebsd openbsd netbsd solaris aix dragonfly illumos android # ios 
+all: linux windows darwin android freebsd openbsd netbsd dragonfly # solaris illumos aix # ios
