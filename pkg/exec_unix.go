@@ -9,13 +9,15 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"syscall"
+
+	// "syscall"
 	"unsafe"
 
 	"github.com/creack/pty"
 	"github.com/google/shlex"
 	"github.com/qsocket/qs-netcat/log"
 	qsocket "github.com/qsocket/qsocket-go"
+	"golang.org/x/sys/unix"
 )
 
 const SHELL = "/bin/bash -il"
@@ -85,9 +87,9 @@ func ExecCommand(conn *qsocket.QSocket, specs *SessionSpecs) error {
 
 func GetCurrentTermSize() (*Winsize, error) {
 	ws := &Winsize{}
-	retCode, _, errno := syscall.Syscall(syscall.SYS_IOCTL,
-		uintptr(syscall.Stdin),
-		uintptr(syscall.TIOCGWINSZ),
+	retCode, _, errno := unix.Syscall(unix.SYS_IOCTL,
+		uintptr(unix.Stdin),
+		uintptr(unix.TIOCGWINSZ),
 		uintptr(unsafe.Pointer(ws)))
 
 	if int(retCode) == -1 {

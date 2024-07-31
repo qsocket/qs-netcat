@@ -67,4 +67,4 @@ dragonfly:
 clean:
 	rm -rfv ./build
 
-all: linux windows darwin freebsd openbsd netbsd solaris aix dragonfly illumos android # ios 
+all: linux windows darwin android freebsd openbsd netbsd dragonfly # solaris illumos aix # ios
