@@ -52,5 +52,6 @@ func main() {
 	err = qsnetcat.Connect(opts)
 	if err != nil && err != io.EOF {
 		log.Error(err)
+		os.Exit(1)
 	}
 }
