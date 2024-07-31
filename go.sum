@@ -24,8 +24,8 @@ github.com/qsocket/encrypted-stream v0.0.0-20231023165659-580d263e71f4 h1:EpdKbG
 github.com/qsocket/encrypted-stream v0.0.0-20231023165659-580d263e71f4/go.mod h1:ev4+HY9osvIdxmY0ZJ78z4QjF2xMz/r0OTEgl30+mV0=
 github.com/qsocket/go-srp v0.0.0-20230315175014-fb16dd9247df h1:PbAZ0Eb2pfUZ/tyNpLq45aYb28VH59EIRKE1zBQRu0g=
 github.com/qsocket/go-srp v0.0.0-20230315175014-fb16dd9247df/go.mod h1:qTi2TUfUFeM6K/d2DGDuI4s2eL+cvHGKOsHvIqxXujY=
-github.com/qsocket/qsocket-go v0.0.5-beta.0.20240801155927-7873e28fac8c h1:Un11Sj2sR0DL4oAQiS+/es65bHpyUZxmRd/qQHs9ZrQ=
-github.com/qsocket/qsocket-go v0.0.5-beta.0.20240801155927-7873e28fac8c/go.mod h1:L311tY5zuH/whw0lxiAoABbvViMMhoLVPld4xEIvr90=
+github.com/qsocket/qsocket-go v0.0.8-beta h1:SHpeksJFhFkwlE8+Lpy+UdGZaHDsdT3nhJv7Da2xPgo=
+github.com/qsocket/qsocket-go v0.0.8-beta/go.mod h1:L311tY5zuH/whw0lxiAoABbvViMMhoLVPld4xEIvr90=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.25.0 h1:ypSNr+bnYL2YhwoMt2zPxHFmbAN1KZs/njMG3hxUp30=

@@ -10,7 +10,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/mdp/qrterminal/v3 v3.1.1
 	github.com/qsocket/conpty-go v0.0.0-20230315180542-d8f8596877dc
-	github.com/qsocket/qsocket-go v0.0.5-beta.0.20240801155927-7873e28fac8c
+	github.com/qsocket/qsocket-go v0.0.8-beta
 	golang.org/x/term v0.22.0
 )
 
