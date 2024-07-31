@@ -14,7 +14,9 @@ import (
 	"github.com/mdp/qrterminal/v3"
 	"github.com/qsocket/qs-netcat/log"
 	"github.com/qsocket/qs-netcat/utils"
-	"github.com/qsocket/qsocket-go/qsocket"
+
+
+	"github.com/qsocket/qsocket-go"
 )
 
 const (
@@ -35,24 +37,24 @@ var ForwardAddrRgx = regexp.MustCompile(`([0-9]{1,5}:|)(?:[0-9]{1,3}\.){3}[0-9]{
 
 // Main config struct for parsing the TOML file
 type Options struct {
-	Secret          string `help:"Secret (e.g. password)." name:"secret" short:"s"`
-	Execute         string `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
-	ForwardAddr     string `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
-	SocksAddr       string `help:"User socks proxy address for connecting QSRN." name:"socks" short:"x"`
-	CertFingerprint string `help:"Hex encoded TLS certificate fingerprint for validation." name:"cert-fp"`
-	ProbeInterval   int    `help:"Probe interval for connecting QSRN." name:"probe" short:"n" default:"5"`
-	DisableEnc      bool   `help:"Disable all encryption." name:"plain" short:"C"`
-	End2End         bool   `help:"Use E2E encryption. (default:true)" name:"e2e" default:"true"`
-	Interactive     bool   `help:"Execute with a PTY shell." name:"interactive" short:"i"`
-	Listen          bool   `help:"Server mode. (listen for connections)" name:"listen" short:"l"`
-	RandomSecret    bool   `help:"Generate a Secret. (random)" name:"generate" short:"g"`
-	CertPinning     bool   `help:"Enable certificate pinning on TLS connections." name:"pin" short:"K"`
-	Quiet           bool   `help:"Quiet mode. (no stdout)" name:"quiet" short:"q"`
-	UseTor          bool   `help:"Use TOR for connecting QSRN." name:"tor" short:"T"`
-	GenerateQR      bool   `help:"Generate a QR code with given stdin and print on the terminal." name:"qr"`
-	Verbose         bool   `help:"Verbose mode." name:"verbose" short:"v"`
-	InPipe          *os.File
-	OutPipe         *os.File
+	Secret          string   `help:"Secret (e.g. password)." name:"secret" short:"s"`
+	Execute         string   `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
+	ForwardAddr     string   `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
+	SocksAddr       string   `help:"User socks proxy address for connecting QSRN." name:"socks" short:"x"`
+	CertFingerprint string   `help:"Hex encoded TLS certificate fingerprint for validation." name:"cert-fp"`
+	ProbeInterval   int      `help:"Probe interval for connecting QSRN." name:"probe" short:"n" default:"5"`
+	DisableEnc      bool     `help:"Disable all encryption." name:"plain" short:"C"`
+	End2End         bool     `help:"Use E2E encryption. (default:true)" name:"e2e" default:"true"`
+	Interactive     bool     `help:"Execute with a PTY shell." name:"interactive" short:"i"`
+	Listen          bool     `help:"Server mode. (listen for connections)" name:"listen" short:"l"`
+	RandomSecret    bool     `help:"Generate a Secret. (random)" name:"generate" short:"g"`
+	CertPinning     bool     `help:"Enable certificate pinning on TLS connections." name:"pin" short:"K"`
+	Quiet           bool     `help:"Quiet mode. (no stdout)" name:"quiet" short:"q"`
+	UseTor          bool     `help:"Use TOR for connecting QSRN." name:"tor" short:"T"`
+	GenerateQR      bool     `help:"Generate a QR code with given stdin and print on the terminal." name:"qr"`
+	Verbose         bool     `help:"Verbose mode." name:"verbose" short:"v"`
+	InPipe          *os.File `kong:"-"`
+	OutPipe         *os.File `kong:"-"`
 	Version         kong.VersionFlag
 }
 

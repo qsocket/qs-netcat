@@ -50,11 +50,7 @@ func ProbeQSRN(opts *config.Options) error {
 	}
 
 	// Dial QSRN...
-	if opts.DisableEnc {
-		err = qs.DialTCP()
-	} else {
-		err = qs.Dial()
-	}
+	err = qs.Dial(!opts.DisableEnc)
 	if err != nil {
 		return err
 	}
@@ -136,11 +132,8 @@ func ServeToLocal(qs *qsocket.QSocket, opts *config.Options) {
 				log.Fatal(err)
 			}
 		}
-		if opts.DisableEnc {
-			err = qs.DialTCP()
-		} else {
-			err = qs.Dial()
-		}
+
+		err = qs.Dial(!opts.DisableEnc)
 		if err != nil {
 			spn.Stop()
 			log.Error(err)
@@ -203,11 +196,8 @@ func Connect(opts *config.Options) error {
 			log.Fatal(err)
 		}
 	}
-	if opts.DisableEnc {
-		err = qs.DialTCP()
-	} else {
-		err = qs.Dial()
-	}
+
+	err = qs.Dial(!opts.DisableEnc)
 	if err != nil {
 		return err
 	}
@@ -227,10 +217,13 @@ func Connect(opts *config.Options) error {
 func AttachToPipe(conn *qsocket.QSocket, opts *config.Options) error {
 	finalMsg := "No pipe is initialized..."
 	defer func() { log.Info(finalMsg) }()
+	defer conn.Close()
 	if opts.InPipe != nil {
-		spn.Suffix = fmt.Sprintf(" Reading from %s...", opts.InPipe.Name())
-		spn.Start()
-		defer spn.Stop()
+		if !opts.Listen {
+			spn.Suffix = fmt.Sprintf(" Reading from %s...", opts.InPipe.Name())
+			spn.Start()
+			defer spn.Stop()
+		}
 		total := 0
 		for {
 			data := make([]byte, 1024)
@@ -250,10 +243,12 @@ func AttachToPipe(conn *qsocket.QSocket, opts *config.Options) error {
 			}
 		}
 	} else if opts.OutPipe != nil {
-		spn = spinner.New(spinner.CharSets[9], 50*time.Millisecond, spinner.WithWriter(os.Stderr))
-		spn.Suffix = fmt.Sprintf(" Writing into %s...", opts.OutPipe.Name())
-		spn.Start()
-		defer spn.Stop()
+		if !opts.Listen {
+			spn = spinner.New(spinner.CharSets[9], 50*time.Millisecond, spinner.WithWriter(os.Stderr))
+			spn.Suffix = fmt.Sprintf(" Writing into %s...", opts.OutPipe.Name())
+			spn.Start()
+			defer spn.Stop()
+		}
 		total := 0
 		for {
 			data := make([]byte, 1024)
