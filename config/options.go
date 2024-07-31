@@ -15,7 +15,6 @@ import (
 	"github.com/qsocket/qs-netcat/log"
 	"github.com/qsocket/qs-netcat/utils"
 
-
 	"github.com/qsocket/qsocket-go"
 )
 

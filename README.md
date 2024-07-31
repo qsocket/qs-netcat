@@ -34,6 +34,11 @@ It allows redirecting fully interactive PTY sessions with reverse connections, e
 > [!WARNING]  
 > This tool is in its early alpha development stage, featuring experimental functionality that may lack backwards compatibility, and users are advised to exercise caution and not use it in production environments.
 
+> [!CAUTION]
+> Due to the changes to the relay protocol, clients starting from version `v0.0.8-beta` will not be compatible with the older versions. You can still access your older instances using previous client versions `(>= v.0.0.7-beta)` until October 23, 2024. **After October 23, 2024, legacy relay support will end, and all out-of-date QSocket instances will become inaccessible!**
+
+
+
 ## Installation
 
 [![Open in Cloud Shell](.github/img/cloud-shell.png)][google-cloud-shell]
