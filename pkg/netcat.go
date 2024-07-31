@@ -27,7 +27,7 @@ var (
 func ProbeQSRN(opts *config.Options) error {
 	// This is nessesary for persistence on windows
 	os.Unsetenv("QS_ARGS") // Remove this for allowing recursive qs-netcat usage
-	qs := qsocket.NewSocket(opts.Secret)
+	qs := qsocket.NewSocket(GetPeerTag(opts), opts.Secret)
 	err := qs.SetE2E(opts.End2End)
 	if err != nil {
 		return err
@@ -37,10 +37,6 @@ func ProbeQSRN(opts *config.Options) error {
 		if err != nil {
 			return err
 		}
-	}
-	err = qs.SetIdTag(GetPeerTag(opts))
-	if err != nil {
-		return err
 	}
 	if opts.SocksAddr != "" {
 		err = qs.SetProxy(opts.SocksAddr)
@@ -162,7 +158,7 @@ func Connect(opts *config.Options) error {
 		spn.Start()
 	}
 
-	qs := qsocket.NewSocket(opts.Secret)
+	qs := qsocket.NewSocket(GetPeerTag(opts), opts.Secret)
 	err := qs.SetE2E(opts.End2End)
 	if err != nil {
 		log.Fatal(err)
@@ -173,11 +169,6 @@ func Connect(opts *config.Options) error {
 			log.Fatal(err)
 		}
 	}
-	err = qs.SetIdTag(GetPeerTag(opts))
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	if opts.ForwardAddr != "" {
 		parts := strings.Split(opts.ForwardAddr, ":")
 		switch len(parts) {
@@ -288,9 +279,9 @@ func AttachToSocket(conn *qsocket.QSocket, interactive bool) error {
 	return nil
 }
 
-func GetPeerTag(opts *config.Options) byte {
+func GetPeerTag(opts *config.Options) qsocket.SocketType {
 	if opts.Listen {
-		return qsocket.PEER_SRV
+		return qsocket.Server
 	}
-	return qsocket.PEER_CLI
+	return qsocket.Client
 }
