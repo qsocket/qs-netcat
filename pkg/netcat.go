@@ -6,7 +6,6 @@ import (
 	"io"
 	"net"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/qsocket/qs-netcat/config"
@@ -66,7 +65,7 @@ func ProbeQSRN(opts *config.Options) error {
 	// First check if forwarding enabled
 	if specs.ForwardAddr != "" {
 		// Redirect traffic to forward addr
-		err = CreateOnConnectPipe(qs, specs.ForwardAddr)
+		err = CreatePipeOnConnect(qs, specs.ForwardAddr)
 		if err != nil {
 			return err
 		}
@@ -86,7 +85,7 @@ func ProbeQSRN(opts *config.Options) error {
 	return err
 }
 
-func CreateOnConnectPipe(qs *qsocket.QSocket, addr string) error {
+func CreatePipeOnConnect(qs *qsocket.QSocket, addr string) error {
 	defer qs.Close()
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -107,8 +106,8 @@ func CreateOnConnectPipe(qs *qsocket.QSocket, addr string) error {
 	return err
 }
 
-func ServeToLocal(qs *qsocket.QSocket, opts *config.Options) {
-	ln, err := net.Listen("tcp", ":"+strings.Split(opts.ForwardAddr, ":")[0])
+func InitLocalProxy(qs *qsocket.QSocket, opts *config.Options) {
+	ln, err := net.Listen("tcp", ":"+opts.LocalPort)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,6 +134,14 @@ func ServeToLocal(qs *qsocket.QSocket, opts *config.Options) {
 			log.Error(err)
 			continue
 		}
+
+		err = SendSessionSpecs(qs, opts)
+		if err != nil {
+			spn.Stop()
+			log.Error(err)
+			continue
+		}
+
 		spn.Suffix = " Forwarding local traffic..."
 		go func() {
 			_, err = io.Copy(conn, qs)
@@ -169,18 +176,11 @@ func Connect(opts *config.Options) error {
 			log.Fatal(err)
 		}
 	}
-	if opts.ForwardAddr != "" {
-		parts := strings.Split(opts.ForwardAddr, ":")
-		switch len(parts) {
-		case 2:
-		case 3:
-			opts.ForwardAddr = fmt.Sprintf("%s:%s", parts[1], parts[2])
-			ServeToLocal(qs, opts)
-		default:
-			spn.Stop()
-			log.Fatal("Invalid forward address!")
-		}
+
+	if opts.LocalPort != "" {
+		InitLocalProxy(qs, opts)
 	}
+
 	if opts.SocksAddr != "" {
 		err = qs.SetProxy(opts.SocksAddr)
 		if err != nil {

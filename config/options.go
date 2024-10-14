@@ -31,7 +31,7 @@ Example for a reverse shell:
 )
 
 var (
-	ForwardAddrRgx = regexp.MustCompile(`([0-9]{1,5}:|)(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}`)
+	ForwardAddrRgx = regexp.MustCompile(`(?P<lport>([0-9]{1,5}):|)(?P<rhost>(?:[0-9]{1,3}\.){3}[0-9]{1,3}):(?P<rport>[0-9]{1,5})`)
 	Version        = "?"
 )
 
@@ -39,7 +39,7 @@ var (
 type Options struct {
 	Secret          string   `help:"Secret (e.g. password)." name:"secret" short:"s"`
 	Execute         string   `help:"Execute command [e.g. \"bash -il\" or \"cmd.exe\"]" name:"exec" short:"e"`
-	ForwardAddr     string   `help:"IP:PORT for traffic forwarding." name:"forward" short:"f"`
+	ForwardAddr     string   `help:"IP:PORT or PORT:IP:PORT for port forwarding." name:"forward" short:"f"`
 	SocksAddr       string   `help:"User socks proxy address for connecting QSRN." name:"socks" short:"x"`
 	CertFingerprint string   `help:"Hex encoded TLS certificate fingerprint for validation." name:"cert-fp"`
 	ProbeInterval   int      `help:"Probe interval for connecting QSRN." name:"probe" short:"n" default:"5"`
@@ -53,6 +53,7 @@ type Options struct {
 	UseTor          bool     `help:"Use TOR for connecting QSRN." name:"tor" short:"T"`
 	GenerateQR      bool     `help:"Generate a QR code with given stdin and print on the terminal." name:"qr"`
 	Verbose         bool     `help:"Verbose mode." name:"verbose" short:"v"`
+	LocalPort       string   `kong:"-"`
 	InPipe          *os.File `kong:"-"`
 	OutPipe         *os.File `kong:"-"`
 	Version         kong.VersionFlag
@@ -134,6 +135,12 @@ func ConfigureOptions() (*Options, error) {
 	}
 
 	if opts.ForwardAddr != "" && !ForwardAddrRgx.MatchString(opts.ForwardAddr) {
+		subMatches := ForwardAddrRgx.FindStringSubmatch(opts.ForwardAddr)
+		lport := ForwardAddrRgx.SubexpIndex("lport")
+		rhost := ForwardAddrRgx.SubexpIndex("rhost")
+		rport := ForwardAddrRgx.SubexpIndex("rport")
+		opts.LocalPort = subMatches[lport]
+		opts.ForwardAddr = fmt.Sprintf("%s:%s", subMatches[rhost], subMatches[rport])
 		return nil, errors.New("Invalid forward address.")
 	}
 
