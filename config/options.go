@@ -101,11 +101,12 @@ func ConfigureOptions() (*Options, error) {
 		return nil, err
 	}
 
-	if utils.IsFilePiped(os.Stdin) {
+	// Disable smart pipe if parameters are being passed via env
+	if utils.IsFilePiped(os.Stdin) && qsArgs == "" {
 		opts.InPipe = os.Stdin
 	}
 
-	if utils.IsFilePiped(os.Stdout) {
+	if utils.IsFilePiped(os.Stdout) && qsArgs == "" {
 		opts.OutPipe = os.Stdout
 		utils.EnableSmartPipe()
 	}
