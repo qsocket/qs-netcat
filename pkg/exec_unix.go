@@ -27,7 +27,7 @@ var (
 	PtyWidth  int = 157
 )
 
-func ExecCommand(conn *qsocket.QSocket, specs *SessionSpecs) error {
+func ExecCommand(conn *qsocket.QSocket, specs SessionSpecs) error {
 	// If non specified spawn OS shell...
 	if specs.Command == "" {
 		specs.Command = SHELL
@@ -82,7 +82,7 @@ func ExecCommand(conn *qsocket.QSocket, specs *SessionSpecs) error {
 	cmd.Stdin = conn
 	cmd.Stdout = conn
 	cmd.Stderr = conn
-	return cmd.Start()
+	return cmd.Run()
 }
 
 func GetCurrentTermSize() (*Winsize, error) {

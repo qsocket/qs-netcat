@@ -25,7 +25,7 @@ const SHELL = "cmd.exe"
 // 	proc.Call(ATTACH_PARENT_PROCESS) // We need this to get console output when using windowsgui subsystem.
 // }
 
-func ExecCommand(conn *qsocket.QSocket, specs *SessionSpecs) error {
+func ExecCommand(conn *qsocket.QSocket, specs SessionSpecs) error {
 	// If non specified spawn OS shell...
 	if specs.Command == "" {
 		specs.Command = SHELL

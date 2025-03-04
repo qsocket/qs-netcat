@@ -77,7 +77,7 @@ func ProbeQSRN(opts *config.Options) error {
 
 	go func() {
 		// Execute command/program and redirect stdin/out/err
-		err = ExecCommand(qs, specs)
+		err = ExecCommand(qs, *specs)
 		if err != nil {
 			log.Error(err)
 		}
